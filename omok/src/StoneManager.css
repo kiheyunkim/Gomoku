@@ -1,0 +1,33 @@
+#omokBoard{
+    border-collapse: collapse;
+    max-height : 100%;
+    max-width : 100%;
+    table-layout: fixed;
+    width: 100% !important;
+    
+}
+
+#omokBoard > tbody{
+    height : 100%;
+    width : 100%;
+    border: none;
+}
+
+#omokBoard > tbody tr{
+    height : 100%;
+    width : 100%;
+    border: none;
+}
+
+#omokBoard > tbody  td{
+    height : 5%;
+    width : 5%;
+    border: none;
+    background-color: blue;
+}
+
+#stoneImg{
+    display: block;
+    max-width: 100%;
+    width: auto;
+}
