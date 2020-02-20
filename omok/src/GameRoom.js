@@ -1,35 +1,13 @@
 import StoneManager from './StoneManager'
 import Chatting  from './Chatting'
 const React = require('react');
-const socketIo = require('socket.io-client');
 
 class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 창
     constructor(props){     //소켓처리 -> 팀 할당받아야함
         super(props);
+        this.socket = this.props.socket;
         this.team = 'black';
         this.isMyTurn = true;
-        this.socket = socketIo('http://127.0.0.1:4000');
-        this.readySocket();
-        this.socket.emit('EnterNotify','request');//접속 요청
-    }
-
-    readySocket = ()=>{
-        this.socket.on('Result',(recv)=>{
-            if(recv.type === 'Entry'){
-                console.log(recv.result);
-            }
-        })
-
-        this.socket.on('chattingRecv',(recv)=>{
-            console.log('돌아온 채팅내용  ' + recv.result);
-            //채팅 내용 작성
-        });
-
-        this.socket.on('OpponentTurnEnd',()=>{
-            console.log('상대의 턴이 끝났습니다');
-            this.isMyTurn = true;
-            //상대 턴 끝남 알림
-        });
     }
 
     RequestStart = ()=>{
@@ -53,7 +31,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
     }
     render(){
         return(
-            <div>
+            <div id ="gameArea">
                 <StoneManager placeStone = {this.clickTarget}/>   
                 <Chatting />
             </div>

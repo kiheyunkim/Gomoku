@@ -9,6 +9,8 @@ const IO = require('socket.io').listen(server);
 
 let WaitingRoomList = []
 
+//대기실은  SHA 256으로 랜덤 생성
+
 IO.on('connection',(socket)=>{
     socket.on('EnterNotify',(recv)=>{//접속요청
         socket.emit('Result',{type:'Entry',result: 'welcome'});
@@ -28,7 +30,7 @@ IO.on('connection',(socket)=>{
 
     socket.on('RequestRoomCreate',()=>{ //방 생성 요청 밑 진입
         //소켓 통신용아이디 / 접속 목록 / 방 상태
-        WaitingRoomList.push({roomid:sha256(WaitingRoomList.length), member:[],state:'NORMAL'})
+        WaitingRoomList.push({roomid:WaitingRoomList.length, member:[],state:'NORMAL'})
 
         socket.emit('Result',{type:'createSuccess',result:'OK'});
     })
