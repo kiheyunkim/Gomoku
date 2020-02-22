@@ -22,6 +22,11 @@ IO.on('connection',(socket)=>{
     //socket.id = //id 할당
     //socket.state = 'Waiting';   //접속 브라우저의 상태
 
+    socket.on('disconnect',(reason)=>{
+        console.log('disconnected Reason:'+reason);
+        socket.disconnect(true);
+    })
+
     //대기실 번호 요청
     socket.on('RequestWaitingRoom',()=>{
         socket.roomId = waitingRoomId;
