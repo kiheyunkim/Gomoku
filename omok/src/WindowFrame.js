@@ -1,9 +1,10 @@
 import React from "react";
-import GameRoom from './GameRoom';
+import GameRoom from './Game/GameRoom';
 import WaittingRoom from './WaittingRoom';
 import LoginRoom from './Login';
+import Room from './Room'
 import './WindowFrame.css';
-import {NavLink, Route, HashRouter} from "react-router-dom";
+import {Route, HashRouter, Redirect} from "react-router-dom";
 
 const socketIo = require('socket.io-client');
 
@@ -11,52 +12,37 @@ class WindowFrame extends React.Component{
     constructor(props){
         super(props);
         this.socket = socketIo('http://127.0.0.1:4000');
-        this.socket.emit('EnterNotify','request');//접속 요청
+        this.socket.emit('RequestWaitingRoom','');//접속 요청
+        this.waitingRoomId='';
         this.readySocket();
 
-        this.socket.on('disconnect',()=>{
-            console.log('disconnected');
-        })
+        this.state={currentPage:'/Waiting'};
     }
 
     readySocket = () => {
-        this.socket.on('Result',(recv)=>{
-            if(recv.type === 'Entry'){
-                console.log(recv.result);
-            }
-        })
-
-        this.socket.on('chattingRecv',(recv)=>{
-            console.log('돌아온 채팅내용  ' + recv.result);
-            //채팅 내용 작성
-        });
-
-        this.socket.on('OpponentTurnEnd',()=>{
-            console.log('상대의 턴이 끝났습니다');
-            this.isMyTurn = true;
-            //상대 턴 끝남 알림
+        this.socket.on('Result',(recv)=>{   
+            this.waitingRoomId = recv.roomId;
+            this.socket.off('Result',()=>{})
         });
     }
 
-    cleanUpSocket = () =>{
-        this.socket.off('Result',)
+    navigateOtherPage = (navTo)=>{
+        this.setState({currentPage:navTo});
     }
 
     render(){
         //NavLink를 동적으로 생성하면 좋을듯 함.
         return(
             <HashRouter>
+                <Redirect to = {this.state.currentPage}/>
                 <div>
-                    <ul>
-                        <h1>O-MOK!</h1>
-                        <li><NavLink exact to='/'>Home</NavLink></li>
-                        <li><NavLink to='/Waiting'>Waiting</NavLink></li>
-                        <li><NavLink to='/Game'>Game</NavLink></li>
-                    </ul>
+                    <button onClick={()=>this.navigateOtherPage()}>버튼</button>
+
                     <div>
-                        <Route exact path='/' component={()=><LoginRoom socket={this.socket}/>}/>
-                        <Route exact path='/Waiting' component={()=><WaittingRoom socket={this.socket}/>}/>
-                        <Route exact path='/Game' component={()=><GameRoom socket={this.socket}/>}/>
+                        <Route exact path='/' component={()=><LoginRoom socket={this.socket} navTo={this.navigateOtherPage}/>}/>
+                        <Route exact path='/Waiting' component={()=><WaittingRoom socket={this.socket} navTo={this.navigateOtherPage} />}/>
+                        <Route exact path='/Room' component={()=><Room socket={this.socket} navTo={this.navigateOtherPage}/>}/>
+                        <Route exact path='/Game' component={()=><GameRoom socket={this.socket} navTo={this.navigateOtherPage}/>}/>
                     </div>
                 </div>
             </HashRouter>
@@ -65,3 +51,12 @@ class WindowFrame extends React.Component{
 }
 
 export default WindowFrame;
+/*
+    <ul>
+        <h1>O-MOK!</h1>
+        <li><NavLink exact to='/'>Home</NavLink></li>
+        <li><a href='#/Waiting'>Waiting</a></li>
+        <li><NavLink to='/Room'>Room</NavLink></li>
+        <li><NavLink to='/Game'>Game</NavLink></li>
+    </ul>
+*/

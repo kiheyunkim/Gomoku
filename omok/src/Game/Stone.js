@@ -1,13 +1,13 @@
-import Empty from './Empty.jpg';
-import White from './White.jpg';
-import Black from './Black.jpg';
+import Empty from './Img/Empty.jpg';
+import White from './Img/White.jpg';
+import Black from './Img/Black.jpg';
 const React = require('react');
 
 class Stone extends React.Component{
     constructor(props){
         super(props);
         this.state ={ stoneState : 'E', current:'blank'};
-        this.source ={
+        this.source = {
             blank:Empty,
             white:White,
             black:Black
