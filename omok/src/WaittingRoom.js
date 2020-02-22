@@ -3,12 +3,23 @@ import React from "react";
 class WaittingRoom extends React.Component{
     constructor(props){
         super(props);
+        console.log('hi Waiting');
         this.state={channelList:[], messageList:[]};
         this.socket = this.props.socket;
-        
-
+        this.msgInput = React.createRef();
     }
     
+    componentDidMount() { 
+        this._ismounted = true;
+        this.readySocket();
+        this.ReloadChannelList();
+    }
+
+    componentWillUnmount(){
+        this._ismounted = false;
+        this.cleanUpSocket();
+    }
+
     readySocket = ()=>{
         this.socket.on('ChannelList',(recv)=>{
             if(!this._ismounted){
@@ -25,33 +36,55 @@ class WaittingRoom extends React.Component{
 
             this.setState({messageList:recv});
         });
+
+        this.socket.on('WaitingChattingResponse',(recv)=>{
+            if(!this._ismounted){
+                return;
+            }
+
+            //채팅 내용 추가.
+            console.log(recv);
+        })
+
+        this.socket.on('Result',(recv)=>{
+            if(recv.type === 'Entry'){
+                if(recv.result === 'OK'){
+                    this.props.navTo('Room');
+                }else if(recv.result === 'FULL'){
+                    alert('꽉 차있습니다.')
+                }
+            }
+        })
     };
 
     cleanUpSocket = ()=>{
         this.socket.off('ChannelList',()=>{});
         this.socket.off('WaitingMessage',()=>{});
-    }
-
-    componentDidMount() { 
-        this._ismounted = true;
-        this.readySocket();
-        this.socket.emit('RequestRoomList','');
-    }
-
-    componentWillUnmount(){
-        this._ismounted = false;
-        this.cleanUpSocket();
+        this.socket.off('WaitingChattingResponse',()=>{});
     }
 
     clickRoom = (roomId) =>{
         this.socket.emit('RequestEnterRoom',{roomId:roomId});
     }
 
+    ReloadChannelList = ()=>{
+        this.socket.emit('RequestRoomList','');
+    }
+
+    CreateRoom = ()=>{
+        this.socket.emit('RequestRoomCreate','');
+    }
+
+    sendMessage = (message)=>{//아이디 추가
+        this.socket.emit('WaitingChatting',message);
+        this.msgInput.current.value ='';
+    }
+
     render(){
         let listArray = this.state.channelList;
         let renderList = [];
         for(let i=0 ; i<listArray.length ; ++i){
-            renderList.push(<li onClick={()=>{this.clickRoom(i)}} key={i+10}>번호: {listArray[i].roomid} 
+            renderList.push(<li onClick={()=>this.clickRoom(i)} key={i+10}>번호: {listArray[i].roomid} 
                 방제목: {listArray[i].roomName} 인원: {listArray[i].member.length}/2 현재 상태: {listArray[i].state} </li>)
         }
         
@@ -74,49 +107,17 @@ class WaittingRoom extends React.Component{
                     <ul>
                         {messageList}
                     </ul>
+                    <input type='text' placeholder='chatting' ref={this.msgInput}></input>
+                    <button onClick={()=>{this.sendMessage(this.msgInput.current.value)}}>전송</button>
                 </div>
-            </div>
+                <div>
+                    <button onClick={()=>this.CreateRoom()}>방생성</button>
+                    <button onClick={()=>this.ReloadChannelList()}>새로고침</button>
+                </div>
 
+            </div>
         )
     }
 }
 
 export default WaittingRoom;
-
-
-
-        //this.socket;
-/*
-        this.socket.on('ChannelList',(recv)=>{
-            this.socket.emit('RequestRoomList','');
-            if(!this._ismounted) return;
-            this.setState({channelList:recv.WaitingRoomList});
-            this.waitingRoomId = recv.waitingRoomId;
-            
-            this.socket.to(this.waitingRoomId).on('Result',(recv)=>{
-                if(!this._ismounted) return;
-                if(recv.type === 'Entry'){
-                    if(recv.result === 'OK'){    //집입 성공
-                        alert(recv.socketRoomId+'로 진입');
-                        this.props.navTo('/Room');
-                    }else if(recv.result === 'FULL'){
-                        alert('인원이 꽉 찼습니다');
-                    }
-                }
-            })
-        });
-
-        //this.socket.to(this.waitingRoomId).emit('RequestRoomList');
-    }
-        this.socket.on('Result',(recv)=>{
-            if(!this._ismounted) return;
-            if(recv.type === 'Entry'){
-                if(recv.result === 'OK'){    //집입 성공
-                    alert(recv.socketRoomId+'로 진입');
-                    this.props.navTo('/Room');
-                }else if(recv.result === 'FULL'){
-                    alert('인원이 꽉 찼습니다');
-                }
-            }
-        })
-        */

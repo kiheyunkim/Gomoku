@@ -8,6 +8,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
         this.socket = this.props.socket;
         this.team = 'black';
         this.isMyTurn = true;
+        console.log('hi Game');
     }
 
     RequestStart = ()=>{
