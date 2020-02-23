@@ -34,7 +34,7 @@ class WindowFrame extends React.Component{
             renderArr.push(<LoginRoom key='1' socket={this.socket}/>);
         }else if(this.state.ScreenState === 'Waiting'){
             renderArr.push(<WaittingRoom key='1' socket={this.socket}/>);
-        }else if(this.state.ScreenState === 'WaitingRoomng'){
+        }else if(this.state.ScreenState === 'WaitingRoom'){
             renderArr.push(<Room key='1' socket={this.socket}/>);
         }else if(this.state.ScreenState === 'Game'){
             renderArr.push(<GameRoom key='1' socket={this.socket}/>);

@@ -15,6 +15,7 @@ class Stone extends React.Component{
     }
 
     componentDidMount(){//처음 올려졌을 때
+        
     }
 
     shouldComponentUpdate(){//변화시 마다 해야할것. -> 이미지 교체

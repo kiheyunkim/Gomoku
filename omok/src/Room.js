@@ -4,13 +4,27 @@ class Room extends React.Component{
     constructor(props){
         super(props);
         this.socket = props.socket;
-        console.log('hi Room');
     }
 
+    LeaveToWaitingRoom = () =>{
+        this.socket.emit('RequestLeaveRoom','');
+    }
+
+    ReadyToStartGame = ()=>{
+        this.socket.emit();
+    }
+
+
     render(){
+        let renderMemberList=[];
+
         return(
             <div>
-                room
+                
+                <ul>
+                    {renderMemberList}
+                </ul>
+                <button>방에서 나가기</button>
             </div>
         )
     }

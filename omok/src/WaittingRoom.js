@@ -28,21 +28,12 @@ class WaittingRoom extends React.Component{
             this.setState({channelList:recv.WaitingRoomList});
         });
 
-        this.socket.on('WaitingMessage',(recv)=>{
-            if(!this._ismounted){
-                return;
-            }
-
-            this.setState({messageList:recv});
-        });
-
         this.socket.on('WaitingChattingResponse',(recv)=>{
             if(!this._ismounted){
                 return;
             }
 
-            //채팅 내용 추가.
-            console.log(recv);
+            this.setState({messageList: this.state.messageList.concat({nickname:recv.nickname, message:recv.message})}); 
         })
 
         this.socket.on('Result',(recv)=>{
@@ -56,7 +47,6 @@ class WaittingRoom extends React.Component{
 
     cleanUpSocket = ()=>{
         this.socket.off('ChannelList',()=>{});
-        this.socket.off('WaitingMessage',()=>{});
         this.socket.off('WaitingChattingResponse',()=>{});
     }
 
@@ -73,7 +63,7 @@ class WaittingRoom extends React.Component{
     }
 
     sendMessage = (message)=>{//아이디 추가
-        this.socket.emit('WaitingChatting',message);
+        this.socket.emit('WaitingChatting',{message:message});
         this.msgInput.current.value ='';
     }
 
@@ -81,14 +71,13 @@ class WaittingRoom extends React.Component{
         let listArray = this.state.channelList;
         let renderList = [];
         for(let i=0 ; i<listArray.length ; ++i){
-            renderList.push(<li onClick={()=>this.EnterRoom(i)} key={i+10}>번호: {listArray[i].roomid} 
-                방제목: {listArray[i].roomName} 인원: {listArray[i].member.length}/2 현재 상태: {listArray[i].state} </li>)
+            renderList.push(<li onClick={()=>this.EnterRoom(listArray[i].roomid)} key={i+10}>번호: {i+1} / 방제목: {listArray[i].roomName} / 인원: {listArray[i].member.length}/2 / 현재 상태: {listArray[i].state} </li>)
         }
         
         let messageList = this.state.messageList;
-        let messageRenderList = [];
+        let messageRenderList = []; 
         for(let i=0;i<messageList.length;++i){
-            messageRenderList.push(<li key={i}>{messageList[i].name}: {messageList[i].message}</li>)
+            messageRenderList.push(<li key={i}>{messageList[i].nickname}: {messageList[i].message}</li>)
         }
 
         return(
@@ -102,7 +91,7 @@ class WaittingRoom extends React.Component{
                 <div id = 'ChatList'>
                     채팅 목록
                     <ul>
-                        {messageList}
+                        {messageRenderList}
                     </ul>
                     <input type='text' placeholder='chatting' ref={this.msgInput}></input>
                     <button onClick={()=>{this.sendMessage(this.msgInput.current.value)}}>전송</button>
