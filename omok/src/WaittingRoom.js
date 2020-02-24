@@ -25,7 +25,7 @@ class WaittingRoom extends React.Component{
                 return;
             }
 
-            this.setState({channelList:recv.WaitingRoomList});
+            this.setState({channelList:recv.GameRoomList});
         });
 
         this.socket.on('WaitingChattingResponse',(recv)=>{
@@ -40,6 +40,8 @@ class WaittingRoom extends React.Component{
             if(recv.type === 'Entry'){
                 if(recv.result === 'FULL'){
                     alert('꽉 차있습니다.')
+                }else if(recv.result === 'Invalid'){
+                    alert('존재하지 않는 방입니다.');
                 }
             }
         })
@@ -50,8 +52,8 @@ class WaittingRoom extends React.Component{
         this.socket.off('WaitingChattingResponse',()=>{});
     }
 
-    EnterRoom = (roomId) =>{
-        this.socket.emit('RequestEnterRoom',{roomId:roomId});
+    EnterRoom = (roomid) =>{
+        this.socket.emit('RequestEnterRoom',{roomid:roomid});
     }
 
     ReloadChannelList = ()=>{
