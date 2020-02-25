@@ -1,4 +1,5 @@
 import React from "react";
+import './WaitingRoom.css';
 
 class WaittingRoom extends React.Component{
     constructor(props){
@@ -73,36 +74,56 @@ class WaittingRoom extends React.Component{
         let listArray = this.state.channelList;
         let renderList = [];
         for(let i=0 ; i<listArray.length ; ++i){
-            renderList.push(<li onClick={()=>this.EnterRoom(listArray[i].roomid)} key={i+10}>번호: {i+1} / 방제목: {listArray[i].roomName} / 인원: {listArray[i].member.length}/2 / 현재 상태: {listArray[i].state} </li>)
+            renderList.push(
+                <tr className="room btn" onClick={()=>this.EnterRoom(listArray[i].roomid)} key={i+10}>{/*<!-- 채널 방 (기본 클래스명은 'room btn'(2개), 추가 클래스는 'no1','no2','no3'...)  -->*/}
+                    <td id="num">{i+1}</td>
+                    <td id="roomName">{listArray[i].roomName}</td>
+                    <td id="member"><span>{listArray[i].member.length}</span>/2</td>
+                    <td id="state">{listArray[i].state}</td>
+                </tr>
+            )
         }
         
         let messageList = this.state.messageList;
         let messageRenderList = []; 
         for(let i=0;i<messageList.length;++i){
-            messageRenderList.push(<li key={i}>{messageList[i].nickname}: {messageList[i].message}</li>)
+            messageRenderList.push(
+                <li key={i}>{/*<!-- 채팅 메세지 -->*/}
+                    <span id="nickname">{messageList[i].nickname}:</span>
+                    <p id="message">{messageList[i].message}</p>
+                </li>
+            )
         }
 
         return(
             <div>
-                <div id = 'channelList'>
-                    채널목록
-                    <ul>
+                <div id = 'channelList'>{/*<!-- 채널 목록  -->*/}
+                    <table>
+                        <thead className="listHead">{/*<!-- 목록 별 제목  -->*/}
+                            <tr>
+                                <th scope="cols">방번호</th>
+                                <th scope="cols">방제목</th>
+                                <th scope="cols">인원</th>
+                                <th scope="cols">상태</th>
+                            </tr>
+                        </thead>
+                        <tbody className="listRoom">
                         {renderList}
-                    </ul>
+                        </tbody>
+                    </table>
                 </div>
-                <div id = 'ChatList'>
-                    채팅 목록
+
+                <div id = 'ChatList'>{/*<!-- 채팅 목록  -->*/}
                     <ul>
                         {messageRenderList}
                     </ul>
-                    <input type='text' placeholder='chatting' ref={this.msgInput}></input>
-                    <button onClick={()=>{this.sendMessage(this.msgInput.current.value)}}>전송</button>
+                    <input type='text' placeholder='chatting' ref={this.msgInput}></input>{/*<!-- 채팅 입력 칸 -->*/}
+                    <button onClick={()=>{this.sendMessage(this.msgInput.current.value)}} id="sendMessage">전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
                 </div>
-                <div>
-                    <button onClick={()=>this.CreateRoom()}>방생성</button>
-                    <button onClick={()=>this.ReloadChannelList()}>새로고침</button>
+                <div id="listBtn">
+                    <button onClick={()=>this.CreateRoom()} id="create">방생성</button>
+                    <button onClick={()=>this.ReloadChannelList()} id="reload">새로고침</button>
                 </div>
-
             </div>
         )
     }

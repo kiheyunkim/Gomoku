@@ -15,10 +15,14 @@ class WindowFrame extends React.Component{
         
         this.state={ScreenState:''};
         this.socket.emit('RequestWaitingRoom','');//접속 요청
+        this.team = 'blank';
     }
 
     readySocket = () => {
         this.socket.on('ScreenChange',(recv)=>{
+            if(recv.ScreenType === 'Game'){
+                this.team = recv.type;
+            }
             this.setState({ScreenState:recv.ScreenType})
         })
 
@@ -43,8 +47,6 @@ class WindowFrame extends React.Component{
         
         return(
             <div>
-                <button onClick={()=>this.setState({ScreenState:'Game'})}>버튼1</button>
-                <button onClick={()=>this.next2()}>버튼2</button>
                 {renderArr}
             </div>
         )

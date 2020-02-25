@@ -18,30 +18,21 @@ class Room extends React.Component{
 
     readySocket = () =>{
         this.socket.on('RequestedRoomMember',(recv)=>{
-            if(!this._ismounted){
+            if(!this._ismounted)
                 return;
-            }
-
-            console.log(recv);
             this.setState({members:recv.members,adminState:recv.isAmIAdmin});
         });
 
-        this.socket.on('memberStateChange',(recv)=>{
-            if(!this._ismounted){
-                return;
-            }
-
-            this.setState({members:recv.members});
-            this.amiAdmin = recv.isAmIAdmin;
-        });
-
         this.socket.on('ReloadRoomMember',(recv)=>{
-            if(!this._ismounted){
+            if(!this._ismounted)
                 return;
-            }
             
             this.socket.emit('RequestRoomMember','');
         });
+
+        this.socket.on('StartFail',()=>{
+            alert('모두 준비 되지 않았습니다');
+        })
 
         this.socket.emit('RequestRoomMember','');
     }
@@ -51,13 +42,8 @@ class Room extends React.Component{
     }
    
     NotifyReady = ()=>{
-        this.socket.emit();
-    }
-
-    NotifyStart = ()=>{
-        this.socket.emit();
-    }
-    
+        this.socket.emit('ReadyStateChangeRequest','');
+    } 
 
     render(){
         let renderMemberList=[];
@@ -68,9 +54,9 @@ class Room extends React.Component{
 
         let readyButton = [];
         if(this.state.adminState){
-            readyButton.push(<button key={1} onClick={()=>this.NotifyStart} >Start</button>);
+            readyButton.push(<button key={1} onClick={()=>this.NotifyReady()} >Start</button>);
         }else{
-            readyButton.push(<button key={1} onClick={()=>this.NotifyReady} >Ready</button>);
+            readyButton.push(<button key={1} onClick={()=>this.NotifyReady()} >Ready</button>);
         }
 
         console.log(this.state.adminState);
