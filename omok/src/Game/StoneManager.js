@@ -1,13 +1,16 @@
 import Stone from './Stone';
-import './StoneManager.css';
+import Empty from './Img/Empty.jpg';
+import White from './Img/White.jpg';
+import Black from './Img/Black.jpg';
+
 const React = require('react');
 
 class StoneManager extends React.Component{
     constructor(props){
         super(props);
-        this.stoneArray = [];
+        
     }
-
+        
     render(){
         let stones = [];
 
@@ -15,7 +18,7 @@ class StoneManager extends React.Component{
             let stoneWrppaer =[];
             for(let j=0;j<20;++j){
                 stoneWrppaer.push( 
-                <td id = 'stones' key ={j+i}><Stone xPos = {j} yPos = {i} placeStone={this.props.placeStone} /></td>);
+                <td id = 'stones' key ={j+i}><Stone xPos = {j} yPos = {i} /></td>);
             }
             stones.push(
                 <tr key ={i+20}>

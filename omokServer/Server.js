@@ -10,12 +10,13 @@ const waitingRoomId = Sha256((Math.random() * 10000).toString());
 console.log(waitingRoomId);
 
 let GameRoomList = []
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL'});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다2', member:[], state:'NORMAL'});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다3', member:[], state:'NORMAL'});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다4', member:[], state:'NORMAL'});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다5', member:[], state:'NORMAL'});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다6', member:[], state:'NORMAL'});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
 
 //대기실은 SHA 256으로 랜덤 생성
 IO.on('connection',(socket)=>{
@@ -74,7 +75,7 @@ IO.on('connection',(socket)=>{
     socket.on('RequestRoomCreate',(request)=>{ //방 생성 요청 //클라이언트가 요청한 제목으로 개설해줌
         let newTitle = request.title.replace(/</g,'&lt;').replace(/>/g,'&gt;'); //XSS방지
         let newRoom = {roomid:Sha256((new Date().toString())), roomName:newTitle, member:[], state:'NORMAL'};
-        newRoom.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank', turn: 0});//방 생성
+        newRoom.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank'});//방 생성
         GameRoomList.push(newRoom);                                      //방 삽입
         socket.leave(socket.roomid);                                     //기존 방 탈출
         socket.roomid = newRoom.roomid;                                  //새로운 방 번호 할당
@@ -89,7 +90,7 @@ IO.on('connection',(socket)=>{
             socket.emit('Result',{type:'Entry', result:'Invalid'});        //방이 없음 -> 잘못된 접근
         }else if(room.member.length < 2){//빈자리는 있음
             //방에 멤버 삽입
-            room.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank', turn: 0});
+            room.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank'});
             //기존방에 대한 처리와 새로운 방으로의 진입, 그리고 새로운 방번호 할당
             socket.leave(socket.roomid);
             socket.roomid = recv.roomid;
@@ -162,8 +163,20 @@ IO.on('connection',(socket)=>{
                 otherMember.teamColor = 'white';
                 //2. 턴할당 -> 
                 targetRoom.turn = 0;    //0번부터 시작할 수 있도록. 
+                //방장의 화면 전환을 기록해줌
+                socket.screenState = 'Game';
+                //방에 있는 보드 초기화 
+                targetRoom.board = [];
+                for(let i=0;i<20;++i){
+                    for(let j=0;j<20;++j){
+                        targetRoom.board.push(0);
+                    }
+                }
+
                 //시작하도록 클라들에게 전달
                 IO.to(socket.roomid).emit('ScreenChange',{ScreenType :'Game'});
+                
+                
             }else{//시작 불가 - 상대가 아직 레디 하지 않음
                 //레디 안했다는 메세지 전달
                 IO.to(socket.id).emit('StartFail','');
@@ -171,10 +184,67 @@ IO.on('connection',(socket)=>{
         }else{                                                      //아닌 경우엔 방장 아닌 사람이 레디한것.
             //레디 상태만 바꿈
             selfMember.readyState = !selfMember.readyState;
+            //소켓의 화면 상태 갱신
+            if(selfMember.readyState){//레디가 됐으면 게임상태
+                socket.screenState = 'Game';
+            }else{
+                socket.screenState = 'WaitingRoom';
+            }
             //방의 모두에게 갱신을 통보
             IO.to(socket.roomid).emit('ReloadRoomMember','');
         }
     });
+
+    //게임 화면 -----------------------------
+    socket.on('RequestGameSetting',(recv)=>{
+        let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
+        let selfMember = targetRoom.member.find(element=>element.nickname === socket.nickname);
+        
+        IO.to(socket.id).emit('GameInitialization',{color:selfMember.teamColor, isYourTurn: (targetRoom.member[targetRoom.turn].nickname === socket.nickname ? true : false)});
+    });
+
+    //GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+    //돌 놓는거 확인
+    socket.on('StonePlace',(recv)=>{
+        let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
+
+        //놓는 그 위치에는 돌이 있는가?
+        if(targetRoom.board[recv.xPos + recv.yPos * 20] !== 0){
+            IO.to(socket.id).emit('PlaceResult',{Result:'WrongPos'});
+            return;
+        }
+
+        //팀 파악
+        let team = 0;
+        if(targetRoom.member.find(element=>element.nickname===socket.nickname).teamColor === 'black'){
+            team = 1;
+        }else{
+            team = 2;
+        }
+
+        //서버상에 돌을 놓음
+        targetRoom.board[recv.xPos + recv.yPos * 20] = team;
+        
+        //돌 놓음을 통지
+        IO.sockets.to(socket.roomid).emit('PlaceStone',{xPos:recv.xPos,yPos:recv.yPos, team:team});
+
+        //승리 했는지 체크
+        let isVictory = false;
+        /*
+        //-> 8방향 체크
+        //북쪽
+        let count = 1;
+        while(count < 5 && )
+
+
+        
+        if(isVictory){//승리했다고 통보
+        
+        }else{//다음 턴을 통보
+
+        }*/
+        socket.broadcast.to(socket.roomid).emit('PlaceResult',{Result:'YourTurn'});
+    })
 
 
     //let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
