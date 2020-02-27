@@ -39,6 +39,16 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             }
         })
 
+        this.socket.on('PlayResult', (recv)=>{
+            if(recv.result === 'Victory'){
+                alert('승리하였습니다');
+                this.socket.emit('CheckResult','');
+            }else if(recv.result === 'Defeat'){
+                alert('패배하였습니다');
+                this.socket.emit('CheckResult','');
+            }
+        });
+
         this.socket.on('PlaceStone',(recv)=>{
             let board = this.state.board;
             board[recv.xPos + 20 * recv.yPos] = recv.team;
@@ -72,12 +82,12 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
                 }
 
                 rowStones.push(
-                    <td id = 'stones' key ={j+i}><Stone xPos = {j} yPos = {i} color = {type} click ={this.ClickStone}/></td>
+                    <td id = 'stones' key ={j+(i*20)}><Stone xPos = {j} yPos = {i} color = {type} click ={this.ClickStone}/></td>
                 );
             }
 
             boardRenderList.push(
-                <tr key ={i+20}>
+                <tr key ={i+400}>
                     {rowStones}
                 </tr>
             )

@@ -207,13 +207,11 @@ IO.on('connection',(socket)=>{
     //돌 놓는거 확인
     socket.on('StonePlace',(recv)=>{
         let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
-
         //놓는 그 위치에는 돌이 있는가?
         if(targetRoom.board[recv.xPos + recv.yPos * 20] !== 0){
             IO.to(socket.id).emit('PlaceResult',{Result:'WrongPos'});
             return;
         }
-
         //팀 파악
         let team = 0;
         if(targetRoom.member.find(element=>element.nickname===socket.nickname).teamColor === 'black'){
@@ -221,48 +219,144 @@ IO.on('connection',(socket)=>{
         }else{
             team = 2;
         }
-
         //서버상에 돌을 놓음
         targetRoom.board[recv.xPos + recv.yPos * 20] = team;
-        
         //돌 놓음을 통지
         IO.sockets.to(socket.roomid).emit('PlaceStone',{xPos:recv.xPos,yPos:recv.yPos, team:team});
-
+        
         //승리 했는지 체크
-        let isVictory = false;
-        /*
-        //-> 8방향 체크
-        //북쪽
-        let count = 1;
-        while(count < 5 && )
-
-
-        
+        let isVictory = checkVictory(targetRoom.board, recv.xPos, recv.yPos);
         if(isVictory){//승리했다고 통보
-        
+            IO.to(socket.id).emit('PlayResult',{result:'Victory'});//승리 통보
+            socket.broadcast.to(socket.roomid).emit('PlayResult',{result:'Defeat'});//패배통보
         }else{//다음 턴을 통보
+            socket.broadcast.to(socket.roomid).emit('PlaceResult',{Result:'YourTurn'});
+        }
+    });
 
-        }*/
-        socket.broadcast.to(socket.roomid).emit('PlaceResult',{Result:'YourTurn'});
-    })
-
-
-    //let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
-    //let stateTarget = targetRoom.member.find(element=>element.nickname === socket.nickname);
-
-/*
-
-    
-
-    //레디
-    socket.on('RequestReady',(recv)=>{
-        
-
-    })
-    //시작
-    */
+    socket.on('CheckResult',()=>{
+        IO.to(socket.id).emit('ScreenChange',{ScreenType :'WaitingRoom'});
+    });
 });
 
+let checkVictory=(board,posX,posY)=>{       //로직 검사
+    //북쪽 조사
+    let stdColor = board[posX + posY * 20];  //이 색을 기준으로 조사해야함
+    let x = posX, y = posY - 1;
+    let count = 1;
+    while(y >= 0){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++;
+        y--;
+    }
+    if(count === 5){
+        return true;
+    }
 
+    //북동쪽 조사
+    x = posX + 1;
+    y = posY - 1;
+    count = 1;
+    while(y >= 0 && x < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x++;
+        y--;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //동쪽 조사
+    x = posX + 1;
+    y = posY;
+    count = 1;
+    while(x < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x++;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //동남쪽 조사
+    x = posX + 1;
+    y = posY + 1;
+    count = 1;
+    while(x < 20 && y < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x++;
+        y++;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //남쪽 조사
+    x = posX;
+    y = posY + 1;
+    count = 1;
+    while(y < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        y++;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //남서쪽 조사
+    x = posX - 1;
+    y = posY + 1;
+    count = 1;
+    while(x >= 0 && y < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        y++;
+        x--;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //서쪽 조사
+    x = posX - 1;
+    y = posY;
+    count = 1;
+    while(x >= 0){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x--;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    //북서쪽 조사
+    x = posX - 1;
+    y = posY - 1;
+    count = 1;
+    while(x >= 0 && y >= 0){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x--;
+        y--;
+    }
+    if(count === 5){
+        return true;
+    }
+
+    return false;
+}
         //IO.sockets.in(socket.roomId).emit('Result',{roomId : socket.roomId});   //같은 roomID에 대해서만 보내는 방법
         //IO.sockets.in(socket.roomId).emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면을 어디로 옮겨줄지?

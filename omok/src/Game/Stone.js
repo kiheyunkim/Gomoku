@@ -8,13 +8,9 @@ class Stone extends React.Component{
         super(props);
         this.stoneState='blank';
     }
-
-    componentDidMount(){//처음 올려졌을 때
-    }
-
+    
     placeThisStone = () =>{
         this.props.click(this.props.xPos, this.props.yPos );
-        
     }
 
     render(){
