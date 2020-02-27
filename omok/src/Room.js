@@ -34,6 +34,10 @@ class Room extends React.Component{
             alert('모두 준비 되지 않았습니다');
         })
 
+        this.socket.on('NotFull',()=>{
+            alert('인원이 부족합니다.');
+        })
+
         this.socket.emit('RequestRoomMember','');
     }
     

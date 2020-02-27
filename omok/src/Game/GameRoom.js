@@ -22,16 +22,28 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
         this.state = {team:'blank', board:board};
     }
 
+    componentDidMount() { 
+        this._ismounted = true;
+    }
+
+    componentWillUnmount(){
+        this._ismounted = false;
+    }
+
     ReadySocket = ()=>{
         this.socket.on('GameInitialization',(recv)=>{
-            console.log(recv);
+            if(!this._ismounted){
+                return;
+            }
             this.isMyTurn = recv.isYourTurn ? 1 : 2;
             this.setState({team:recv.color});
         });
 
         this.socket.on('PlaceResult',(recv)=>{
-            console.log(recv);
             if(recv.Result === 'WrongPos'){
+                if(!this._ismounted){
+                    return;
+                }
                 alert('잘못된 위치입니다.');
                 this.isMyTurn = 1;
             }else if(recv.Result === 'YourTurn'){
@@ -39,20 +51,30 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             }
         })
 
-        this.socket.on('PlayResult', (recv)=>{
+        this.socket.on('PlayResult', async (recv)=>{
+            if(!this._ismounted){
+                return;
+            }
             if(recv.result === 'Victory'){
-                alert('승리하였습니다');
-                this.socket.emit('CheckResult','');
+                await (new Promise(()=>{
+                    alert('승리하였습니다');
+                    this.socket.emit('CheckResult','');
+                }));
+
             }else if(recv.result === 'Defeat'){
-                alert('패배하였습니다');
-                this.socket.emit('CheckResult','');
+                await (new Promise(()=>{
+                    alert('패배하였습니다');
+                    this.socket.emit('CheckResult','');        
+                }));
             }
         });
 
         this.socket.on('PlaceStone',(recv)=>{
+            if(!this._ismounted){
+                return;
+            }
             let board = this.state.board;
             board[recv.xPos + 20 * recv.yPos] = recv.team;
-            console.log(recv.team);
             this.setState({board:board});
         })
     }

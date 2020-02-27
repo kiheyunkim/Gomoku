@@ -79,7 +79,7 @@ class WaittingRoom extends React.Component{
                     <td id="num">{i+1}</td>
                     <td id="roomName">{listArray[i].roomName}</td>
                     <td id="member"><span>{listArray[i].member.length}</span>/2</td>
-                    <td id="state">{listArray[i].state}</td>
+                    <td id="state"><span className= {listArray[i].state === 'Playing' ? 'playing': ''}>{listArray[i].state === 'Playing' ? '진행': '대기 '}</span></td>
                 </tr>
             )
         }
@@ -96,7 +96,7 @@ class WaittingRoom extends React.Component{
         }
 
         return(
-            <div>
+            <div id="omokbody">
                 <div id = 'channelList'>{/*<!-- 채널 목록  -->*/}
                     <table>
                         <thead className="listHead">{/*<!-- 목록 별 제목  -->*/}

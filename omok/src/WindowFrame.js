@@ -3,14 +3,13 @@ import GameRoom from './Game/GameRoom';
 import WaittingRoom from './WaittingRoom';
 import LoginRoom from './Login';
 import Room from './Room'
-import './WindowFrame.css';
 
 const socketIo = require('socket.io-client');
 
 class WindowFrame extends React.Component{
     constructor(props){
         super(props);
-        this.socket = socketIo('http://127.0.0.1:4000');
+        this.socket = socketIo('http://121.168.178.27:4000');
         this.readySocket();
         
         this.state={ScreenState:''};

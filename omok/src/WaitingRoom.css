@@ -1,0 +1,307 @@
+#root>div{
+  height: 100%;
+}
+
+body{
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+#root{
+  margin: 0 auto;
+  max-width: 1920px;
+  height: 80vh;
+  font-family: 'Noto Sans KR';
+}
+
+#omokbody{
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  position: relative;
+}
+
+/* 방 목록 */
+#channelList{
+  width: 60%;
+  height: 100%;
+  text-align: center;
+  padding: 4px;
+  border: 2px solid #e6e6e6;
+  border-radius: 10px 0;
+  box-sizing: border-box;
+  background-color: #e8e8e8;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+#channelList table{
+  width: 100%;
+  padding: 0;
+  border-collapse: collapse;
+}
+table .listHead{
+}
+table .listHead tr{
+  
+}
+table .listHead th{
+   background: linear-gradient(to right, #595e25b5, #718258);
+  font-size: 16px;
+  padding: 4px 4px 6px 4px;
+  color: #3c3c3c;
+   border-radius: 6px 0px;
+   font-weight: normal;
+   border-right: 2px solid #a3b162;
+   font-family: 'Yeon Sung';
+   letter-spacing: 2px;
+  position: relative;
+}
+table .listHead th::after{
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  border-top: 6px solid rgba(0,0,0,0.4);
+  border-left: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  height: 0;
+}
+table .listHead th:nth-last-child(1){
+  border-right: none;
+}
+table .listRoom{
+  border-collapse: collapse;
+}
+.room{
+  border-bottom: 1px solid #cacaca;
+  height: 46px;
+}
+.room:nth-last-child(1){
+  border-bottom: none;
+}
+.btn{
+  cursor: pointer;
+  background: linear-gradient(to top, rgba(176, 176, 176, 0.1), rgba(0,0,0,0));
+}
+.btn:hover{
+  background: linear-gradient(to top, rgba(145, 137, 80, 0.1), rgba(225, 217, 147, 0.2));
+  color: #735316 !important;
+}
+.btn:active{
+  background: linear-gradient(to top, rgba(240, 232, 172, 0.1), rgba(255, 255, 255, 0.2));
+  color: #707b37 !important;
+}
+.room td{
+  font-size: 14px;
+  padding: 4px 4px 6px 4px;
+  border: none;
+}
+#num{
+  width: 10%;
+}
+#roomName{
+  padding-left: 8px; 
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 50%;
+  font-weight: lighter;
+}
+#member{
+  width: 10%;
+  letter-spacing: 4px;
+}
+#member span{
+  font-weight: bold;
+}
+#state{
+  width: 20%;
+}
+#state span{
+  background-color: #62708a;
+  padding: 2px 6px;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+}
+/* 게임중일때 붙는 클래스 */
+.playing{
+  background-color: #b34c47 !important;
+}
+
+/* 채팅 목록 */
+#ChatList{
+  height: calc(100% - 80px);
+  padding-left: 20px;
+  padding-top: 20px;
+  box-sizing: border-box;
+  order: 3;
+  width: 40%;
+}
+#ChatList>ul{
+  list-style: none;
+  padding: 10px;
+  margin: 0 auto;
+  width: 100%;
+  height: calc(100% - 40px);
+  margin-bottom: 10px;
+  border: 1px solid #dfdfdf;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  border-radius: 10px;
+}
+#ChatList>ul li{
+  font-size: 12px;
+}
+#nickname, #message{
+  display: inline;
+  margin: 0 auto;
+}
+#nickname{
+  font-weight: bold;
+}
+#ChatList input{
+  height: 30px;
+  width: calc(100% - 50px);
+  margin: 0 auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+  border: none;
+  background-color: #eee;
+  font-size: 14px;
+  border-radius: 5px;
+}
+#ChatList #sendMessage{
+  width: 50px;
+  margin: 0 auto;
+  padding: 0;
+  height: 30px;
+  border: none;
+  vertical-align: bottom;
+  cursor: pointer;
+  background-color: #c6cc8a;
+  border-radius: 8px 0 8px 8px;
+  position: relative;
+  text-indent: -9999%;
+  overflow: hidden;
+}
+#ChatList #sendMessage::before{
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 30px;
+  left: 0;
+  top: 0;
+  background-image: url(img/right.png);
+  background-repeat: no-repeat;
+  background-size: 30%;
+  background-position: center center;
+  opacity: 0.4;
+}
+#ChatList #sendMessage:hover{
+  background-color: #a2a861;
+}
+#ChatList #sendMessage:hover::before{
+  filter: invert(100%) contrast(200%);
+}
+/* 방 생성 및 새로고침 버튼 */
+#listBtn{
+  height: 80px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  width: calc(40% - 40px);
+  display: flex;
+  justify-content: space-between;
+}
+#listBtn>button{
+  background: linear-gradient(to top, #a4bf59, #e8d27e);
+  width: calc(50% - 5px);
+  height: 100%;
+  border: transparent;
+  position: relative;
+  padding: 0;
+  font-size: 18px;
+  line-height: 7;
+  color: #000;
+  cursor: pointer;
+  transform: perspective(1px) translateZ(0);
+  -webkit-transition-property: color;
+  transition-property: color;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+  color: #828444;
+  letter-spacing: 3px;
+  border-radius: 10px 0 10px 10px;
+  box-shadow: 0px 0px 4px 3px rgba(189, 206, 86, 0.6);
+  text-shadow: -1px 0 rgba(92, 121, 50, 0.2), 0 1px rgba(255,255,255,0.2), 1px 0 rgba(255,255,255,0.2), 0 -1px rgba(255,255,255,0.5);
+  font-family: 'Yeon Sung';
+}
+#listBtn button::before{
+  content: "";
+  position: absolute;
+  width: 54px;
+  height: 50px;
+  left: calc(50% - 27px);
+  top: 5px;
+  background-repeat: no-repeat;
+  background-size: 60%;
+  background-position: center center;
+  opacity: 0.4;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+}
+#listBtn button::after{
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.24);
+  -webkit-transform: scaleY(0);
+  transform: scaleY(0);
+  -webkit-transform-origin: bottom;
+  transform-origin: bottom;
+  -webkit-transition-property: transform;
+  transition-property: transform;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+  -webkit-transition-timing-function: ease-out;
+  transition-timing-function: ease-out;
+  filter: blur(10px);
+}
+#listBtn button:hover{
+  color: #fff;
+  text-shadow: none;
+}
+#listBtn button:hover::before{
+  filter: invert(100%) contrast(200%);
+}
+#listBtn button:hover::after{
+  -webkit-transform: scaleY(1);
+  transform: scaleY(1);
+  -webkit-transition-timing-function: cubic-bezier(0.52, 1.64, 0.37, 0.66);
+  transition-timing-function: cubic-bezier(0.52, 1.64, 0.37, 0.66);
+  filter: blur(10px);
+}
+#listBtn #create::before{
+  background-image: url(img/room.png);
+}
+#listBtn #reload{
+  filter: grayscale(1);
+}
+#listBtn #reload::before{
+  background-image: url(img/refresh.png);
+}
