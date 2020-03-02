@@ -9,18 +9,20 @@ const IO = require('socket.io').listen(server);
 const waitingRoomId = Sha256((Math.random() * 10000).toString());
 
 let GameRoomList = []
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+let roomNumberCount = 1;
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
 
 //대기실은 SHA 256으로 랜덤 생성
 IO.on('connection',(socket)=>{
-    socket.screenState = 'Waiting';                             //이 상태는 소켓의 접속위반 여부를 확인한다. 
-    socket.nickname = Sha256((Math.random() * 10000).toString()) ;                              //소켓 구분용 고유값
+    socket.screenState = 'Login';                             //이 상태는 소켓의 접속위반 여부를 확인한다. 
+    //socket.nickname = Sha256((Math.random() * 10000).toString()) ;                              //소켓 구분용 고유값
     socket.roomid = undefined;                                  //현재 소켓이 속해있는 roomid
 
     socket.on('disconnect',(reason)=>{                          //소켓 접속상태에 변경을 가한 대상들은 모두 종료시킴    //처리자체는 어느 페이지에서도 해야함. 
@@ -68,16 +70,65 @@ IO.on('connection',(socket)=>{
         socket.disconnect();
     });
 
-    //###################로그인 후 첫 접속 대기실 번호 요청 -->
-    socket.on('RequestWaitingRoom',()=>{
-        socket.roomid = waitingRoomId;  //현재 속해있는 방의 아이디 -> 대기실 아이디 할당
-        socket.join(socket.roomid);     //socket io 상으로 대기실에 넣어준다.
-        socket.emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면을 어디로 옮겨줄지?
+    socket.on('LoginScreenRequest',(recv)=>{           
+        socket.emit('ScreenChange',{ScreenType :'Login'});    //처음 화면 지정
     });
 
-    /*
-    Todo 로그인 과정을 넣어줘야함.
-    */
+    socket.on('LoginRequest',(recv)=>{
+        //로그인 요청
+        let id = recv.loginId;
+        let pw = recv.loginPasswd;
+        //DB에 확인
+        let isSuccess = false;
+
+        //###### DB 처리 #############
+        if(id === '1' && pw === '123'){
+            isSuccess = true;
+        }
+        //#############################
+
+        if(isSuccess){
+            socket.screenState = 'Waiting';                                   //소켓 상태 변경
+            IO.to(socket.id).emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면 지정
+            socket.roomid = waitingRoomId;          //현재 속해있는 방의 아이디 -> 대기실 아이디 할당
+            socket.join(socket.roomid);             //socket io 상으로 대기실에 넣어준다.
+            socket.nickname = roomNumberCount++;    //로그인에 따른 닉네임 등록
+        }else{
+            IO.to(socket.id).emit('Result',{ResultType :'LoginFail'});    //실패 통보
+        }
+    });
+
+    socket.on('SignupRequest',(recv)=>{
+        let id = recv.loginId;
+        let passwd1 = recv.loginPasswd;
+        let passwd2 = recv.loginPasswd2;
+        let nickname = recv.nickName;
+
+        let idCheck = true;
+        //ID확인
+        if(!idCheck){
+            IO.to(socket.id).emit('Result',{ResultType:'IdAlreadyExist'});
+            return;
+        }
+        
+        //PW 불일치
+        if(passwd1 !== passwd2){
+            IO.to(socket.id).emit('Result',{ResultType:'PwNotSame'});
+            return;
+        }
+
+        let nickNameCheck = true;
+        //닉네임 체크
+        if(!nickNameCheck){
+            IO.to(socket.id).emit('Result',{ResultType:'NickNameAlreadyExist'});
+            return;
+        }
+        
+        //모두 문제없는경우
+        //DB에 등록
+
+        IO.to(socket.id).emit('Result',{ResultType:'RegisterOK'});
+    })
 
     //###################대기실
     socket.on('RequestRoomList',()=>{   //방 목록 요청
@@ -91,14 +142,15 @@ IO.on('connection',(socket)=>{
 
     socket.on('RequestRoomCreate',(request)=>{ //방 생성 요청 //클라이언트가 요청한 제목으로 개설해줌
         let newTitle = request.title.replace(/</g,'&lt;').replace(/>/g,'&gt;'); //XSS방지
-        let newRoom = {roomid:Sha256((new Date().toString())), roomName:newTitle, member:[], state:'NORMAL'};
+        let newRoom = {roomid:Sha256((new Date().toString())), roomNumber:roomNumberCount, roomName:newTitle, member:[], state:'NORMAL'};
+        roomNumberCount++;
         newRoom.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank'});//방 생성
         GameRoomList.push(newRoom);                                      //방 삽입
         socket.leave(socket.roomid);                                     //기존 방 탈출
         socket.roomid = newRoom.roomid;                                  //새로운 방 번호 할당
         socket.join(newRoom.roomid);                                     //새로운 방으로 진입
         socket.screenState = 'WaitingRoom';
-        IO.to(socket.id).emit('ScreenChange',{ScreenType :'WaitingRoom'});         //화면상 만든방으로 이동시켜줌
+        IO.to(socket.id).emit('ScreenChange',{ScreenType :'WaitingRoom', roomTitle:newTitle, roomNumber:newRoom.roomNumber});         //화면상 만든방으로 이동시켜줌
     });
     
     socket.on('RequestEnterRoom',(recv)=>{
@@ -117,7 +169,7 @@ IO.on('connection',(socket)=>{
             //소켓의 상태 변경
             socket.screenState = 'WaitingRoom';
             //요청한 대상은 화면전환
-            socket.emit('ScreenChange',{ScreenType :'WaitingRoom'});    //해당방으로 이동시켜줌
+            socket.emit('ScreenChange',{ScreenType :'WaitingRoom', roomTitle:room.roomName, roomNumber:room.roomNumber});    //해당방으로 이동시켜줌
         }else{
             socket.emit('Result',{type:'Entry', result:'FULL'});   //꽉  차있음.
         }

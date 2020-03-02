@@ -1,7 +1,6 @@
-import Chatting  from './Chatting'
 import Stone from './Stone';
-import './StoneManager.css';
-const React = require('react');
+import React from 'react';
+import "./GameRoom.css";
 
 class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 창
     constructor(props){     //소켓처리 -> 팀 할당받아야함
@@ -19,7 +18,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             }
         }
     
-        this.state = {team:'blank', board:board};
+        this.state = {team:'blank', board:board, message:[]};
     }
 
     componentDidMount() { 
@@ -114,6 +113,17 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
                 </tr>
             )
         }
+
+        let messageRenderList = [];
+        let messages = this.state.message;
+        for(let i=0;i<messages.length;++i){
+            messageRenderList.push(
+                <li key={i}>{/*<!-- 채팅 메세지 -->*/}
+                    <span id="nickname">{messages[i].nickname}:</span>
+                    <p id="message">{messages[i].message}</p>
+                </li>
+            );
+        }
  
         return(
             <div id ="gameArea">
@@ -122,7 +132,16 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
                         {boardRenderList}
                     </tbody>
                 </table>
-                <Chatting />
+                <div id = 'gameChatList'>{/*<!-- 채팅 목록  -->*/}
+		            <ul>
+		                {messageRenderList}
+		            </ul>
+		            <input type='text' placeholder='chatting' ref={this.msgInput}></input>{/*<!-- 채팅 입력 칸 --><!-- 
+		         -->*/}<button id="sendMessage">전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
+		        </div>
+		        <div id="snack">{/*<!-- 순서가 찾아올 때 나타나는 문구 -->*/}
+		        	<span>당신의 차례입니다.</span>
+		        </div>
             </div>
         )
     }

@@ -76,7 +76,7 @@ class WaittingRoom extends React.Component{
         for(let i=0 ; i<listArray.length ; ++i){
             renderList.push(
                 <tr className="room btn" onClick={()=>this.EnterRoom(listArray[i].roomid)} key={i+10}>{/*<!-- 채널 방 (기본 클래스명은 'room btn'(2개), 추가 클래스는 'no1','no2','no3'...)  -->*/}
-                    <td id="num">{i+1}</td>
+                    <td id="num">{listArray[i].roomNumber}</td>
                     <td id="roomName">{listArray[i].roomName}</td>
                     <td id="member"><span>{listArray[i].member.length}</span>/2</td>
                     <td id="state"><span className= {listArray[i].state === 'Playing' ? 'playing': ''}>{listArray[i].state === 'Playing' ? '진행': '대기 '}</span></td>

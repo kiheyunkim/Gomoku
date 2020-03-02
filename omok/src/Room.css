@@ -1,0 +1,265 @@
+body{
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  #root{
+    margin: 0 auto;
+    max-width: 1920px;
+    height: 80vh;
+    font-family: 'Noto Sans KR';
+  }
+  #root>div{
+    height: 100%;
+  }
+  #num{
+    width: 10%;
+  }
+  #roomName{
+    padding-left: 8px; 
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 50%;
+    font-weight: lighter;
+  }
+  #nickname, #message{
+    display: inline;
+    margin: 0 auto;
+  }
+  #nickname{
+    font-weight: bold;
+  }
+  #roombody{
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    height: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+  }
+  #roomTop{
+    text-align: center;
+    padding: 5px 5px 10px 5px;
+    background: linear-gradient(to top, #E3E3E3, #E7E7E7);
+    border-radius: 10px 0;
+    height: 42px;
+    box-sizing: border-box;
+    z-index: 1;
+  }
+  #roomTop span, #roomTop h2{
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 16px !important;
+    margin: 0 auto;
+    width: auto;
+  }
+  #roomTop span{
+    font-weight: lighter;
+  }
+  #roomMid{
+    height: calc(100% - 42px);
+    padding: 0;
+    margin: 0 auto;
+    list-style: none;
+    position: relative;
+  }
+  #roomMid li:nth-of-type(1),#roomMid li:nth-of-type(2){
+    width: 49%;
+    height: 100%;
+    display: inline-block;
+  }
+  #roomMid li .left{
+    float: left;
+    text-align: right;
+  }
+  #roomMid li .left::before{
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    top: 0;
+    right: 0;
+    background-color: #ccc;
+    background-size: cover;
+    z-index: -1;
+    animation: midAni 2.5s cubic-bezier(.55,1.16,.37,.91) both;
+  }
+  @keyframes midAni{
+    0%{
+      transform: translateY(-800px);
+    }
+    70%{
+      transform: translateY(0px);
+    }
+    85%{
+      transform: translateY(0px);
+    }
+    100%{
+      transform: translateY(0px) skewX(-20deg) translateX(0px);
+    }
+  }
+  #roomMid li .right{
+    float: right;
+    text-align: left;
+  }
+  #roomMid li .right::before{
+    content: "vs";
+    position: absolute;
+    top: calc(50% - 25px);
+    left: -18px;
+    width: 30px;
+    height: 50px;
+    background-color: #fff;
+    font-size: 30px;
+    border-radius: 50%;
+    font-style: normal;
+    font-weight: lighter;
+    animation: opacityAni 0.5s ease-in both;
+    animation-delay: 2.5s;
+    opacity: 0;
+  }
+  @keyframes opacityAni{
+    0%{
+      opacity: 0;
+    }
+    100%{
+      opacity: 1;
+    }
+  }
+  #roomMid li div{
+    width: 100%;
+    height: 100%;
+    padding: 0 40px;
+    box-sizing: border-box;
+    display: table;
+    position: relative;
+  }
+  #roomMid li div div{
+    display: table-cell;
+    vertical-align: middle;
+  }
+  #roomMid li div div span{
+    display: block;
+    font-size: 36px;
+    font-weight: lighter;
+    margin-bottom: 10px;
+    animation: opacityAni 0.5s cubic-bezier(.25,.46,.45,.94) both;
+    animation-delay: 1.4s;
+  }
+  #roomMid li div div b{
+    display: block;
+    margin: 0 auto;
+    font-size: 32px;
+    font-family: 'Yeon Sung';
+    font-weight: normal;
+    letter-spacing: 5px;
+    animation: opacityAni 0.5s cubic-bezier(.25,.46,.45,.94) both;
+    animation-delay: 1.6s;
+  }
+  .preparing{
+    color: #a4a4a4;
+  }
+  .wating{
+    color: #346e8a;
+  }
+  #roombody button{
+    border: none;
+    background-color: transparent;
+  }
+  #roombody .exit{
+    position: absolute;
+    top: 23px;
+    left: 40px;
+    font-size: 12px;
+    color: #aaa;
+    padding: 10px;
+    padding-left: 30px; 
+    cursor: pointer;
+  }
+  #roombody .exit::before{
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 28px;
+    left: 0px;
+    bottom: 3px;
+    background-image: url(img/right.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center center;
+    transform: rotateZ(180deg);
+    transition: all 0.5s;
+    opacity: 0.3;
+  }
+  #roombody .exit:hover::before{
+    transform: rotateZ(180deg) translateX(5px);
+  }
+  #roomBtm{
+  position: absolute;
+  left: calc(50% - 170px);
+  bottom: 20px;
+  max-width: 340px;
+  width: 100%;
+  height: 60px;
+  padding: 0px;
+  box-sizing: border-box;
+  font-family: 'Yeon Sung';
+  font-size: 28px;
+  letter-spacing: 3px;
+  background: linear-gradient(to top, #a4bf59, #e8d27e);
+  color: #828444;
+  border: transparent;
+  border-radius: 10px 0 10px 10px;
+  cursor: pointer;
+  transform: perspective(1px) translateZ(0);
+  -webkit-transition-property: color;
+  transition-property: color;
+  -webkit-transition-duration: 0.5s;
+  transition-duration: 0.5s;
+  box-shadow: 0px 0px 4px 3px rgba(189, 206, 86, 0.6);
+  text-shadow: -1px 0 rgba(92, 121, 50, 0.2), 0 1px rgba(255,255,255,0.2), 1px 0 rgba(255,255,255,0.2), 0 -1px rgba(255,255,255,0.5);
+  animation: opacityAni 0.5s ease-in both;
+  animation-delay: 2.8s;
+  opacity: 0;
+}
+  
+  .ready{
+    filter: hue-rotate(464deg);
+  }
+  #roomBtm::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.24);
+    -webkit-transform: scaleY(0);
+    transform: scaleY(0);
+    -webkit-transform-origin: bottom;
+    transform-origin: bottom;
+    -webkit-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.5s;
+    transition-duration: 0.5s;
+    -webkit-transition-timing-function: ease-out;
+    transition-timing-function: ease-out;
+    filter: blur(10px);
+  }
+  #roomBtm:hover{
+    color: #fff;
+    text-shadow: none;
+  }
+  #roomBtm:hover::after{
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
+    -webkit-transition-timing-function: cubic-bezier(0.52, 1.64, 0.37, 0.66);
+    transition-timing-function: cubic-bezier(0.52, 1.64, 0.37, 0.66);
+    filter: blur(10px);
+  }

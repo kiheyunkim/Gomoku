@@ -1,10 +1,10 @@
 import React from "react";
-
+import './Room.css'
 class Room extends React.Component{
     constructor(props){
         super(props);
         this.socket = props.socket;
-        this.state={members:[],adminState:false};
+        this.state={members:[],adminState:false, readyBttnState:false};
         this.readySocket();
     }
 
@@ -47,31 +47,44 @@ class Room extends React.Component{
    
     NotifyReady = ()=>{
         this.socket.emit('ReadyStateChangeRequest','');
-    } 
+        this.setState({readyBttnState:(!this.state.readyBttnState)});
+    }
 
     render(){
         let renderMemberList=[];
         let memberArray = this.state.members;
         for(let i=0;i<memberArray.length;++i){
-            renderMemberList.push(<li key = {i}>NickName : {memberArray[i].nickname} / 레디상태 : {memberArray[i].readyState?'레디상태':'안함'} </li>)
+            renderMemberList.push(
+                <li key = {i}>
+                    <div className={i===0 ? "left" : "right"}>
+                        <div>
+                            <span id="nickname">{memberArray[i].nickname}</span>
+                            <b className={memberArray[i].readyState?"waiting":"preparing"}>{memberArray[i].readyState?' 준비완료':'준비중'}</b>
+                        </div>
+                    </div>
+                </li>
+            );            
         }
 
         let readyButton = [];
         if(this.state.adminState){
-            readyButton.push(<button key={1} onClick={()=>this.NotifyReady()} >Start</button>);
+            readyButton.push(<button key={1} id="roomBtm" onClick={()=>this.NotifyReady()} >시작</button>);
         }else{
-            readyButton.push(<button key={1} onClick={()=>this.NotifyReady()} >Ready</button>);
+            readyButton.push(<button key={1} id="roomBtm" className={this.state.readyBttnState ? "ready" : ""} onClick={()=>this.NotifyReady()} >준비</button>);
         }
 
-        console.log(this.state.adminState);
         return(
+            <div id="roombody">
+                <header id="roomTop">
+					<span>NO. {this.props.roomNumber}</span>
+					<h2 id="roomName">{this.props.roomName}</h2>
+				</header>
 
-            <div>
-                <h1>당신의 상태: {}</h1>
-                <ul>
-                    {renderMemberList}
-                </ul>
-                <button onClick={()=>this.LeaveToWaitingRoom()}>방에서 나가기</button>
+                <ul id="roomMid">
+                   {renderMemberList}
+				</ul>
+
+                <button onClick={()=>this.LeaveToWaitingRoom()} className="exit">나가기</button>
                 {readyButton}
             </div>
         )
@@ -79,3 +92,8 @@ class Room extends React.Component{
 }
 
 export default Room;
+
+
+				
+				
+

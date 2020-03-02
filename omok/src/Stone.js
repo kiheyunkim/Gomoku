@@ -1,6 +1,6 @@
-import Empty from './Img/Empty.jpg';
-import White from './Img/White.jpg';
-import Black from './Img/Black.jpg';
+import Empty from './img/Empty.jpg';
+import White from './img/White.jpg';
+import Black from './img/Black.jpg';
 const React = require('react');
 
 class Stone extends React.Component{

@@ -1,0 +1,179 @@
+body{
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+#root{
+  margin: 0 auto;
+  max-width: 1920px;
+  height: 80vh;
+  font-family: 'Noto Sans KR';
+}
+#root>div{
+  height: 100%;
+}
+#gameArea{
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px;
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+#gameArea>ul{
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+    text-align: center;
+    max-width: 100%;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    height: 42px;
+}
+#gameArea>ul::after{
+    content: "vs";
+    position: absolute;
+    width: 20px;
+    top: 6px;
+    left: calc(50% - 10px);
+    font-weight: lighter;
+    opacity: 0.4;
+}
+#omokBoard{
+    border-collapse: collapse;
+    max-height : 100%;
+    max-width : 100%;
+    table-layout: fixed;
+    width: 600px;
+    outline: 2px solid #9595955e;
+    margin-bottom: 20px;
+    margin-right: 20px;
+    order: 2;
+}
+#omokBoard > tbody{
+    height : 100%;
+    width : 100%;
+    border: none;
+}
+#omokBoard > tbody tr{
+    height : 100%;
+    width : 100%;
+    border: none;
+}
+#omokBoard > tbody td{
+    height : 5%;
+    width : 5%;
+    border: none;
+    background-color: white;
+}
+#stoneImg{
+    display: block;
+    max-width: 100%;
+    width: auto;
+}
+#stoneImg:hover{
+  filter: brightness(0.8);
+}
+
+/* 채팅 목록 */
+#gameChatList{
+  box-sizing: border-box;
+  width: 240px;
+  max-width: 100%;
+  margin-bottom: 20px;
+  order: 3;
+}
+#gameChatList>ul{
+  list-style: none;
+  padding: 10px;
+  margin: 0 auto;
+  width: 100%;
+  height: calc(100% - 40px);
+  margin-bottom: 10px;
+  border: 1px solid #dfdfdf;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  border-radius: 10px;
+}
+#gameChatList>ul li{
+  font-size: 12px;
+}
+#nickname, #message{
+  display: inline;
+  margin: 0 auto;
+}
+#nickname{
+  font-weight: bold;
+}
+#gameChatList input{
+  height: 30px;
+  width: calc(100% - 50px);
+  margin: 0 auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+  border: none;
+  background-color: #eee;
+  font-size: 14px;
+  border-radius: 5px;
+}
+#gameChatList #sendMessage{
+  width: 50px;
+  margin: 0 auto;
+  padding: 0;
+  height: 30px;
+  border: none;
+  vertical-align: bottom;
+  cursor: pointer;
+  background-color: #c6cc8a;
+  border-radius: 8px 0 8px 8px;
+  position: relative;
+  text-indent: -9999%;
+  overflow: hidden;
+}
+#gameChatList #sendMessage::before{
+  content: "";
+  position: absolute;
+  width: 50px;
+  height: 30px;
+  left: 0;
+  top: 0;
+  background-image: url(img/right.png);
+  background-repeat: no-repeat;
+  background-size: 30%;
+  background-position: center center;
+  opacity: 0.4;
+}
+#gameChatList #sendMessage:hover{
+  background-color: #a2a861;
+}
+#gameChatList #sendMessage:hover::before{
+  filter: invert(100%) contrast(200%);
+}
+
+#snack{
+  order: 1;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 20px;
+}
+#snack span{
+  font-family: 'Yeon Sung';
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+
+@media screen and (max-width:960px){
+    #gameChatList{
+      width: 100%;
+    }
+    #omokBoard{
+      margin-right: 0;
+    }
+    #gameChatList > ul{
+      height: 120px;
+    }
+}
