@@ -1,12 +1,14 @@
 import React from "react";
+import ReactModal from 'react-modal';
 import './WaitingRoom.css';
 
 class WaittingRoom extends React.Component{
     constructor(props){
         super(props);
-        this.state={channelList:[], messageList:[]};
+        this.state={channelList:[], messageList:[], modalState:false};
         this.socket = this.props.socket;
         this.msgInput = React.createRef();
+        this.roomName = React.createRef();
     }
     
     componentDidMount() { 
@@ -61,8 +63,22 @@ class WaittingRoom extends React.Component{
         this.socket.emit('RequestRoomList','');
     }
 
-    CreateRoom = ()=>{
-        this.socket.emit('RequestRoomCreate',{title:'NewRoomName'});
+    CreateRoomButton = ()=>{
+       this.setState({modalState:true});
+    }
+
+    CreateRoomRequest = ()=>{
+        if(this.roomName.current.value.length === 0){
+            alert('방의 제목을 입력해야합니다');
+            return;
+        }
+        this.socket.emit('RequestRoomCreate',{title:this.roomName.current.value});
+        this.roomName.current.value= '';
+    }
+
+    CloseModal = ()=>{
+        this.roomName.current.value= '';
+        this.setState({modalState:false});
     }
 
     sendMessage = (message)=>{//아이디 추가
@@ -97,6 +113,16 @@ class WaittingRoom extends React.Component{
 
         return(
             <div id="omokbody">
+                <ReactModal id = 'modalbody'
+                    isOpen={this.state.modalState}
+                    contentLabel="Minimal Modal Example"
+                    ariaHideApp={false}
+                >
+                    <label>방제목</label><input type="text" ref={this.roomName}/><br/>
+                    <button id="roomMake" onClick={()=>{this.CreateRoomRequest()}}>만들기</button>
+                    <button id="roomCancel" onClick={()=>{this.CloseModal()}}>취소</button>
+                </ReactModal>
+
                 <div id = 'channelList'>{/*<!-- 채널 목록  -->*/}
                     <table>
                         <thead className="listHead">{/*<!-- 목록 별 제목  -->*/}
@@ -121,7 +147,7 @@ class WaittingRoom extends React.Component{
                     <button onClick={()=>{this.sendMessage(this.msgInput.current.value)}} id="sendMessage">전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
                 </div>
                 <div id="listBtn">
-                    <button onClick={()=>this.CreateRoom()} id="create">방생성</button>
+                    <button onClick={()=>this.CreateRoomButton()} id="create">방생성</button>
                     <button onClick={()=>this.ReloadChannelList()} id="reload">새로고침</button>
                 </div>
             </div>

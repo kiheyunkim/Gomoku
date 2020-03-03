@@ -1,8 +1,12 @@
 const express = require('express');
+const fs = require('fs');
 const app = express();
 const Sha256 = require('sha256');
+const mysql = require('./mysql');
+
+const corsInfo = JSON.parse(fs.readFileSync(__dirname +'/AuthInfo/CorsInfo.json',{encoding:'UTF-8'}));
 ///https://www.zerocho.com/category/NodeJS/post/57edfcf481d46f0015d3f0cd
-app.use(require('cors')({origin:'http://121.168.178.27:3000',credentials:true}));
+app.use(require('cors')({origin:corsInfo.origin,credentials:corsInfo.credentials}));
 
 const server = app.listen(4000, ()=>console.log('Omok Server Open  ---> 4000'));
 const IO = require('socket.io').listen(server);
@@ -21,12 +25,11 @@ GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roo
 
 //대기실은 SHA 256으로 랜덤 생성
 IO.on('connection',(socket)=>{
-    socket.screenState = 'Login';                             //이 상태는 소켓의 접속위반 여부를 확인한다. 
-    //socket.nickname = Sha256((Math.random() * 10000).toString()) ;                              //소켓 구분용 고유값
-    socket.roomid = undefined;                                  //현재 소켓이 속해있는 roomid
+    socket.screenState = 'Login';                                     //이 상태는 소켓의 접속위반 여부를 확인한다. 
+    socket.roomid = undefined;                                        //현재 소켓이 속해있는 roomid
 
-    socket.on('disconnect',(reason)=>{                          //소켓 접속상태에 변경을 가한 대상들은 모두 종료시킴    //처리자체는 어느 페이지에서도 해야함. 
-        if(socket.screenState ==='WaitingRoom'){                //게임중이거나 게임방 대기실에 있을 때만 처리해주면 됨.
+    socket.on('disconnect',async (reason)=>{                          //소켓 접속상태에 변경을 가한 대상들은 모두 종료시킴    //처리자체는 어느 페이지에서도 해야함. 
+        if(socket.screenState ==='WaitingRoom'){                      //게임중이거나 게임방 대기실에 있을 때만 처리해주면 됨.
             //게임 대기실에 있는 경우에는 상대에게 반대편이 나갔음을 통보하고 채널목록을 갱신시켜준다.
             let room = GameRoomList.find(element=> element.roomid === socket.roomid);
             if(room === undefined){
@@ -44,16 +47,28 @@ IO.on('connection',(socket)=>{
                 GameRoomList = GameRoomList.filter(element => element.roomid !== socket.roomid);
             }
         }else if(socket.screenState === 'Game'){//게임중인경우에는
-            //상대에게 나갔음을 표시해주고 승리 하나를 올려주고 상대의 화면 상태를 변경, 방의 상태또한 변경시켜준다.
-            //### ToDo        
-
             //나간 대상은 없앤다
             let room = GameRoomList.find(element=> element.roomid === socket.roomid);
-            room.member = room.member.filter(element=>element.nickname !== socket.nickname);
+            room.state = 'NORMAL';
+            
+            let loser = room.member.find(element=>element.nickname === socket.nickname) //나간 존재는 패배 기록
+            loser.loseCount++;
+            let loseWrite = mysql.RenewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
+            await loseWrite;
+
+            let winner = room.member.find(element=>element.nickname !== socket.nickname) //안나간 존재는 승리 기록
+            winner.winCount++;
+            let winnerWrite = mysql.RenewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
+            await winnerWrite;
+
+            room.member = room.member.filter(element=>element.nickname !== socket.nickname);    //나간 멤버 제외
 
             //남은 대상들(나간 대상은 이미 방을 떠났다)의 상태를 대기실로 옮겨줌
-            let sockets = IO.in(socket.roomid).sockets;
+            let sockets = IO.in(socket.roomid).sockets; //안나간자는 승리기록을 바꿔줌(소켓)
             for(let key in sockets) {
+                if(sockets[key] !== socket){
+                    sockets[key].winCount++;      //소켓에도 기록
+                }
                 sockets[key].screenState = 'WaitingRoom';
             }
 
@@ -74,58 +89,121 @@ IO.on('connection',(socket)=>{
         socket.emit('ScreenChange',{ScreenType :'Login'});    //처음 화면 지정
     });
 
-    socket.on('LoginRequest',(recv)=>{
+    socket.on('LoginRequest',async (recv)=>{
         //로그인 요청
         let id = recv.loginId;
         let pw = recv.loginPasswd;
         //DB에 확인
         let isSuccess = false;
-
         //###### DB 처리 #############
-        if(id === '1' && pw === '123'){
-            isSuccess = true;
-        }
+        let logincheck = mysql.CheckLogin(id, Sha256(pw));
+
+        await logincheck.then((value)=>{
+            if(value.length === 0){                     //결과 없음
+                isSuccess = false;
+            }else{
+                isSuccess = true;
+                socket.nickname = value[0].nickname;    //로그인에 따른 닉네임 등록
+            }
+        },(reason)=>{
+            isSuccess = false;
+        });
         //#############################
+
+        if(isSuccess){
+            let getStatic = mysql.GetStatic(socket.nickname);
+            await getStatic.then((value)=>{
+                socket.winCount = value[0].win;
+                socket.loseCount = value[0].lose;
+            },(reason)=>{
+                isSuccess = false;
+            });
+        }
 
         if(isSuccess){
             socket.screenState = 'Waiting';                                   //소켓 상태 변경
             IO.to(socket.id).emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면 지정
             socket.roomid = waitingRoomId;          //현재 속해있는 방의 아이디 -> 대기실 아이디 할당
             socket.join(socket.roomid);             //socket io 상으로 대기실에 넣어준다.
-            socket.nickname = roomNumberCount++;    //로그인에 따른 닉네임 등록
+            
         }else{
             IO.to(socket.id).emit('Result',{ResultType :'LoginFail'});    //실패 통보
         }
     });
 
-    socket.on('SignupRequest',(recv)=>{
+    socket.on('SignupRequest', async (recv)=>{
         let id = recv.loginId;
         let passwd1 = recv.loginPasswd;
         let passwd2 = recv.loginPasswd2;
         let nickname = recv.nickName;
-
-        let idCheck = true;
-        //ID확인
-        if(!idCheck){
-            IO.to(socket.id).emit('Result',{ResultType:'IdAlreadyExist'});
-            return;
-        }
         
         //PW 불일치
         if(passwd1 !== passwd2){
             IO.to(socket.id).emit('Result',{ResultType:'PwNotSame'});
             return;
         }
+        
+        let idCheck = mysql.CheckId(id);
+        let idCheckRes = false;
+        await idCheck.then((value)=>{
+            
+            if(value[0]['count(*)'] === 1){                     //이미 있음 오류
+                idCheckRes = false;
+            }else{
+                idCheckRes = true;
+            }
+        },(reason)=>{
+            idCheckRes = false;                              //DB 오류
+        });
 
-        let nickNameCheck = true;
+        if(!idCheckRes){
+            IO.to(socket.id).emit('Result',{ResultType:'IdAlreadyExist'});
+            return;
+        }
+        
+        let nicknameCheckRes = false;
+        let nicknameCheck = mysql.CheckNickName(nickname);
+        await nicknameCheck.then((value)=>{
+            if(value[0]['count(*)'] === 1){                     //이미 있음 오류
+                nicknameCheckRes = false;
+            }else{
+                nicknameCheckRes = true;
+            }
+        },(reason)=>{
+            nicknameCheckRes = false;                              //DB 오류
+        });
+
         //닉네임 체크
-        if(!nickNameCheck){
+        if(!nicknameCheckRes){
             IO.to(socket.id).emit('Result',{ResultType:'NickNameAlreadyExist'});
             return;
         }
         
         //모두 문제없는경우
         //DB에 등록
+        let registAccount = mysql.RegistAccount(id,Sha256(passwd1),nickname);
+        let registRes = false;
+        await registAccount.then((value)=>{
+            registRes = true;
+        },(reason)=>{
+            registRes = false;
+        })
+
+        //승률 기록용 DB에도 등록
+        if(registRes){
+            let SetStatic = mysql.SetStatic(nickname);
+            await SetStatic.then((value)=>{
+                registRes = true;
+            },(reason)=>{
+                registRes = false;
+            });
+        }
+
+
+        if(!registRes){
+            IO.to(socket.id).emit('Result',{ResultType:'RegisterFail'});
+            return
+        }
 
         IO.to(socket.id).emit('Result',{ResultType:'RegisterOK'});
     })
@@ -144,7 +222,7 @@ IO.on('connection',(socket)=>{
         let newTitle = request.title.replace(/</g,'&lt;').replace(/>/g,'&gt;'); //XSS방지
         let newRoom = {roomid:Sha256((new Date().toString())), roomNumber:roomNumberCount, roomName:newTitle, member:[], state:'NORMAL'};
         roomNumberCount++;
-        newRoom.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank'});//방 생성
+        newRoom.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank', winCount:socket.winCount, loseCount:socket.loseCount });//방 생성
         GameRoomList.push(newRoom);                                      //방 삽입
         socket.leave(socket.roomid);                                     //기존 방 탈출
         socket.roomid = newRoom.roomid;                                  //새로운 방 번호 할당
@@ -159,7 +237,7 @@ IO.on('connection',(socket)=>{
             socket.emit('Result',{type:'Entry', result:'Invalid'});        //방이 없음 -> 잘못된 접근
         }else if(room.member.length < 2){//빈자리는 있음
             //방에 멤버 삽입
-            room.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank'});
+            room.member.push({nickname:socket.nickname, readyState:false, teamColor:'blank', winCount:socket.winCount, loseCount:socket.loseCount});
             //기존방에 대한 처리와 새로운 방으로의 진입, 그리고 새로운 방번호 할당
             socket.leave(socket.roomid);
             socket.roomid = recv.roomid;
@@ -278,7 +356,7 @@ IO.on('connection',(socket)=>{
     });
 
     //돌 놓는거 확인
-    socket.on('StonePlace',(recv)=>{
+    socket.on('StonePlace',async (recv)=>{
         let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
         //놓는 그 위치에는 돌이 있는가?
         if(targetRoom.board[recv.xPos + recv.yPos * 20] !== 0){
@@ -306,6 +384,28 @@ IO.on('connection',(socket)=>{
             for(let i=0;i<members.length;++i){
                 members[i].readyState = false;
             }
+            targetRoom.state = 'NORMAL';
+
+            let loser = targetRoom.member.find(element=>element.nickname !== socket.nickname) //다른 존재는 패배 기록
+            loser.loseCount++;
+            let loseWrite = mysql.RenewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
+            await loseWrite;
+
+            let winner = targetRoom.member.find(element=>element.nickname === socket.nickname) //현재 놓은자는 승리 기록
+            winner.winCount++;
+            let winnerWrite = mysql.RenewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
+            await winnerWrite;
+
+            //남은 대상들(나간 대상은 이미 방을 떠났다)의 상태를 대기실로 옮겨줌
+            let sockets = IO.in(socket.roomid).sockets; //안나간자는 승리기록을 바꿔줌(소켓)
+            for(let key in sockets) {
+                if(sockets[key] === socket){
+                    sockets[key].winCount++;      //승리자 승리기록
+                }else{
+                    sockets[key].loseCount++;
+                }
+            }
+
 
             IO.to(socket.id).emit('PlayResult',{result:'Victory'});//승리 통보
             socket.broadcast.to(socket.roomid).emit('PlayResult',{result:'Defeat'});//패배통보
@@ -439,5 +539,3 @@ let checkVictory=(board,posX,posY)=>{       //로직 검사
 
     return false;
 }
-        //IO.sockets.in(socket.roomId).emit('Result',{roomId : socket.roomId});   //같은 roomID에 대해서만 보내는 방법
-        //IO.sockets.in(socket.roomId).emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면을 어디로 옮겨줄지?

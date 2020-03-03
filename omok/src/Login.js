@@ -65,6 +65,8 @@ class Login extends React.Component{
                 alert('비밀번호가 일치하지 않습니다.');
             }else if(recv.ResultType === 'NickNameAlreadyExist'){
                 alert('이미 존재하는 닉네임입니다.');
+            }else if(recv.ResultType === 'RegisterFail'){
+                alert('회원가입에 실패했습니다.');
             }else if(recv.ResultType === 'RegisterOK'){
                 alert('회원가입되었습니다.');
                 this.ChangeLoginScreen();

@@ -1,10 +1,11 @@
 import React from "react";
 import './Room.css'
+
 class Room extends React.Component{
     constructor(props){
         super(props);
         this.socket = props.socket;
-        this.state={members:[],adminState:false, readyBttnState:false};
+        this.state={members:[], adminState:false, readyBttnState:false};
         this.readySocket();
     }
 
@@ -20,6 +21,7 @@ class Room extends React.Component{
         this.socket.on('RequestedRoomMember',(recv)=>{
             if(!this._ismounted)
                 return;
+                console.log(recv.members);
             this.setState({members:recv.members,adminState:recv.isAmIAdmin});
         });
 
@@ -59,6 +61,7 @@ class Room extends React.Component{
                     <div className={i===0 ? "left" : "right"}>
                         <div>
                             <span id="nickname">{memberArray[i].nickname}</span>
+                            <p><span id="gameCnt">{memberArray[i].winCount + memberArray[i].loseCount}</span>전 <span id="winCnt">{memberArray[i].winCount}</span>승 <span id="loseCnt">{memberArray[i].loseCount}</span>패</p>
                             <b className={memberArray[i].readyState?"waiting":"preparing"}>{memberArray[i].readyState?' 준비완료':'준비중'}</b>
                         </div>
                     </div>
@@ -92,8 +95,3 @@ class Room extends React.Component{
 }
 
 export default Room;
-
-
-				
-				
-
