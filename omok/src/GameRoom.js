@@ -18,7 +18,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             }
         }
     
-        this.state = {team:'blank', board:board, message:[]};
+        this.state = {team:'blank', board:board, message:[], turn:false};
     }
 
     componentDidMount() { 
@@ -35,7 +35,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
                 return;
             }
             this.isMyTurn = recv.isYourTurn ? 1 : 2;
-            this.setState({team:recv.color});
+            this.setState({team:recv.color,turn:recv.isYourTurn});
         });
 
         this.socket.on('PlaceResult',(recv)=>{
@@ -47,6 +47,9 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
                 this.isMyTurn = 1;
             }else if(recv.Result === 'YourTurn'){
                 this.isMyTurn = 1;
+                this.setState({turn:true})
+            }else if(recv.Result === 'PlaceOK'){
+                this.setState({turn:false})
             }
         })
 
@@ -54,17 +57,13 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             if(!this._ismounted){
                 return;
             }
+            console.log(recv);
             if(recv.result === 'Victory'){
-                await (new Promise(()=>{
-                    alert('승리하였습니다');
-                    this.socket.emit('CheckResult','');
-                }));
-
+                alert('승리하였습니다');
+                this.socket.emit('CheckResult','');
             }else if(recv.result === 'Defeat'){
-                await (new Promise(()=>{
-                    alert('패배하였습니다');
-                    this.socket.emit('CheckResult','');        
-                }));
+                alert('패배하였습니다');
+                this.socket.emit('CheckResult','');        
             }
         });
 
@@ -127,7 +126,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
  
         return(
             <div id ="gameArea">
-                <table id = 'omokBoard' cellSpacing="0" cellPadding="0">
+                <table id ='omokBoard' cellSpacing="0" cellPadding="0">
                     <tbody>
                         {boardRenderList}
                     </tbody>
@@ -139,7 +138,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
 		            <input type='text' placeholder='chatting' ref={this.msgInput}></input>{/*<!-- 채팅 입력 칸 --><!-- 
 		         -->*/}<button id="sendMessage">전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
 		        </div>
-		        <div id="snack">{/*<!-- 순서가 찾아올 때 나타나는 문구 -->*/}
+		        <div id='snack' className={(!this.state.turn ? 'snackOp' : '')}>{/*<!-- 순서가 찾아올 때 나타나는 문구 -->*/}
 		        	<span>당신의 차례입니다.</span>
 		        </div>
             </div>

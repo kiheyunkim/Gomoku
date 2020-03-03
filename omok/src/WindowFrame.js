@@ -30,6 +30,8 @@ class WindowFrame extends React.Component{
 
         this.socket.on('disconnect',(reason)=>{
             alert('서버가 종료되었습니다 '+reason);
+            this.socket.disconnect();
+            this.socket = socketIo('http://121.168.178.27:4000');
         });
     }
 

@@ -177,3 +177,7 @@ body{
       height: 120px;
     }
 }
+
+.snackOp{
+  opacity: 0;
+}

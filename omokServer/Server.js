@@ -99,6 +99,7 @@ IO.on('connection',(socket)=>{
         let logincheck = mysql.CheckLogin(id, Sha256(pw));
 
         await logincheck.then((value)=>{
+            console.log(value);
             if(value.length === 0){                     //결과 없음
                 isSuccess = false;
             }else{
@@ -330,13 +331,14 @@ IO.on('connection',(socket)=>{
                     //시작하도록 클라들에게 전달
                     targetRoom.state = 'Playing';
                     IO.to(socket.roomid).emit('ScreenChange',{ScreenType :'Game'});
-                    
+                    return;
+
                 }else{//시작 불가 - 상대가 아직 레디 하지 않음
                     //레디 안했다는 메세지 전달
-                    IO.to(socket.id).emit('StartFail','');
-                }
+                    socket.emit('StartFail','');
+                } 
             }else{//2명 미만은 시작할 수 없음
-                IO.to(socket.id).emit('NotFull','');
+                socket.emit('NotFull','');
             }
         }else{                                                      //아닌 경우엔 방장 아닌 사람이 레디한것.
             //레디 상태만 바꿈
@@ -407,9 +409,10 @@ IO.on('connection',(socket)=>{
             }
 
 
-            IO.to(socket.id).emit('PlayResult',{result:'Victory'});//승리 통보
-            socket.broadcast.to(socket.roomid).emit('PlayResult',{result:'Defeat'});//패배통보
+            socket.emit('PlayResult',{result:'Victory'});//승리 통보
+            socket.to(socket.roomid).broadcast.emit('PlayResult',{result:'Defeat'});//패배통보
         }else{//다음 턴을 통보
+            socket.emit('PlaceResult',{Result:'PlaceOK'});
             socket.broadcast.to(socket.roomid).emit('PlaceResult',{Result:'YourTurn'});
         }
     });
