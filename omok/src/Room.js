@@ -5,7 +5,7 @@ class Room extends React.Component{
     constructor(props){
         super(props);
         this.socket = props.socket;
-        this.state={members:[], adminState:false, readyBttnState:false};
+        this.state={members:[], adminState:false, readyBttnState:false, roomName:'', roomNumber:0};
         this.readySocket();
     }
 
@@ -32,6 +32,10 @@ class Room extends React.Component{
             this.socket.emit('RequestRoomMember','');
         });
 
+        this.socket.on('RoomInfo',(recv)=>{
+            this.setState({roomName:recv.roomTitle,roomNumber:recv.roomNumber});
+        })
+
         this.socket.on('StartFail',()=>{
             alert('모두 준비 되지 않았습니다');
         })
@@ -41,6 +45,7 @@ class Room extends React.Component{
         })
 
         this.socket.emit('RequestRoomMember','');
+        this.socket.emit('RequestRoomInfo','');
     }
     
     LeaveToWaitingRoom = () =>{
@@ -79,8 +84,8 @@ class Room extends React.Component{
         return(
             <div id="roombody">
                 <header id="roomTop">
-					<span>NO. {this.props.roomNumber}</span>
-					<h2 id="roomName">{this.props.roomName}</h2>
+					<span>NO. {this.state.roomNumber}</span>
+					<h2 id="roomName">{this.state.roomName}</h2>
 				</header>
 
                 <ul id="roomMid">

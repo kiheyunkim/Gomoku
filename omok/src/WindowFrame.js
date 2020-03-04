@@ -31,18 +31,17 @@ class WindowFrame extends React.Component{
         this.socket.on('disconnect',(reason)=>{
             alert('서버가 종료되었습니다 '+reason);
             this.socket.disconnect();
-            this.socket = socketIo('http://121.168.178.27:4000');
         });
     }
 
     render(){
-        let renderArr = [];;
+        let renderArr = [];
         if(this.state.ScreenState === 'Login'){
             renderArr.push(<LoginRoom key='1' socket={this.socket}/>);
         }else if(this.state.ScreenState === 'Waiting'){
             renderArr.push(<WaittingRoom key='1' socket={this.socket}/>);
         }else if(this.state.ScreenState === 'WaitingRoom'){
-            renderArr.push(<Room key='1' socket={this.socket} roomNumber={this.roomNumber} roomName={this.roomName}/>);
+            renderArr.push(<Room key='1' socket={this.socket} />);
         }else if(this.state.ScreenState === 'Game'){
             renderArr.push(<GameRoom key='1' socket={this.socket}/>);
         }else{

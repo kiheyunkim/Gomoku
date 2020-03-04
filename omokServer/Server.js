@@ -14,14 +14,8 @@ const waitingRoomId = Sha256((Math.random() * 10000).toString());
 
 let GameRoomList = []
 let roomNumberCount = 1;
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
-GameRoomList.push({roomid:GameRoomList.length, roomNumber:roomNumberCount++, roomName:'방제목입니다1', member:[], state:'NORMAL', board:[]});
+
+mysql.InitPreventOverlapLogin();
 
 //대기실은 SHA 256으로 랜덤 생성
 IO.on('connection',(socket)=>{
@@ -81,7 +75,11 @@ IO.on('connection',(socket)=>{
                 members[i].readyState = false;
             }
         }
- 
+        
+        if(socket.nickname!==undefined){ //닉네임이 있다는 것은 로그인 했다는 것
+            let disconnectLogout = mysql.LogOutRegist(socket.nickname);
+            await disconnectLogout;
+        }
         socket.disconnect();
     });
 
@@ -99,7 +97,6 @@ IO.on('connection',(socket)=>{
         let logincheck = mysql.CheckLogin(id, Sha256(pw));
 
         await logincheck.then((value)=>{
-            console.log(value);
             if(value.length === 0){                     //결과 없음
                 isSuccess = false;
             }else{
@@ -121,12 +118,39 @@ IO.on('connection',(socket)=>{
             });
         }
 
+        let alreadyLogin = false;
+        if(isSuccess){
+            let preventOverlapLogin = mysql.LoginCheck(socket.nickname);
+            await preventOverlapLogin.then(async (value)=>{
+                if(value[0]['count(*)'] === 1){    //이미 있는 경우
+                    alreadyLogin=true;
+                }else{
+                    alreadyLogin=false;
+                }
+            },(reason)=>{
+                isSuccess = false;
+            });
+        }
+
+        if(alreadyLogin){
+            IO.to(socket.id).emit('Result',{ResultType :'AlreadyLogin'});
+            return;
+        }
+
+
+        if(isSuccess){
+            let registLogin =  mysql.LoginRegist(socket.nickname);   //로그인 등록
+            await registLogin.then((value)=>{
+            },(reason)=>{
+                isSuccess = false;
+            });
+        }
+
         if(isSuccess){
             socket.screenState = 'Waiting';                                   //소켓 상태 변경
             IO.to(socket.id).emit('ScreenChange',{ScreenType :'Waiting'});    //처음 화면 지정
             socket.roomid = waitingRoomId;          //현재 속해있는 방의 아이디 -> 대기실 아이디 할당
             socket.join(socket.roomid);             //socket io 상으로 대기실에 넣어준다.
-            
         }else{
             IO.to(socket.id).emit('Result',{ResultType :'LoginFail'});    //실패 통보
         }
@@ -182,7 +206,7 @@ IO.on('connection',(socket)=>{
         
         //모두 문제없는경우
         //DB에 등록
-        let registAccount = mysql.RegistAccount(id,Sha256(passwd1),nickname);
+        let registAccount = mysql.RegistAccount(id, Sha256(passwd1), nickname);
         let registRes = false;
         await registAccount.then((value)=>{
             registRes = true;
@@ -229,7 +253,7 @@ IO.on('connection',(socket)=>{
         socket.roomid = newRoom.roomid;                                  //새로운 방 번호 할당
         socket.join(newRoom.roomid);                                     //새로운 방으로 진입
         socket.screenState = 'WaitingRoom';
-        IO.to(socket.id).emit('ScreenChange',{ScreenType :'WaitingRoom', roomTitle:newTitle, roomNumber:newRoom.roomNumber});         //화면상 만든방으로 이동시켜줌
+        IO.to(socket.id).emit('ScreenChange',{ScreenType :'WaitingRoom'});         //화면상 만든방으로 이동시켜줌
     });
     
     socket.on('RequestEnterRoom',(recv)=>{
@@ -248,13 +272,17 @@ IO.on('connection',(socket)=>{
             //소켓의 상태 변경
             socket.screenState = 'WaitingRoom';
             //요청한 대상은 화면전환
-            socket.emit('ScreenChange',{ScreenType :'WaitingRoom', roomTitle:room.roomName, roomNumber:room.roomNumber});    //해당방으로 이동시켜줌
+            socket.emit('ScreenChange',{ScreenType :'WaitingRoom'});    //해당방으로 이동시켜줌
         }else{
             socket.emit('Result',{type:'Entry', result:'FULL'});   //꽉  차있음.
         }
     });
 
     //###################게임 대기실
+    socket.on('RequestRoomInfo',()=>{
+        let thisRoom = GameRoomList.find(element => element.roomid === socket.roomid)
+        socket.emit('RoomInfo',{roomTitle:thisRoom.roomName, roomNumber:thisRoom.roomNumber});
+    })
     socket.on('RequestRoomMember',()=>{
         let members = GameRoomList.find(element => element.roomid === socket.roomid).member;
         //요청한 자에게만 보냄.

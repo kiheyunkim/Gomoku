@@ -94,4 +94,66 @@ const SetStatic = (nickname)=>{
     });
 }
 
-module.exports={CheckId, CheckNickName, RegistAccount, CheckLogin, GetStatic, SetStatic, RenewStatic}
+const LoginCheck = (nickname)=>{
+    return new Promise((resolve,reject)=>{
+        connection.query('SELECT count(*) FROM preventOverlapLogin WHERE nickname=?',[nickname],(error,results,field)=>{
+            if(error){
+                reject('error');
+            }else{
+                resolve(results);
+            }
+        });
+    });
+}
+
+const LoginRegist = (nickname)=>{
+    return new Promise((resolve,reject)=>{
+        connection.query('INSERT INTO preventOverlapLogin VALUES(?)',[nickname],(error,results,field)=>{
+            if(error){
+                reject('error');
+            }else{
+                resolve(results);
+            }
+        });
+    });
+}
+
+const LogOutRegist = (nickname)=>{
+    return new Promise((resolve,reject)=>{
+        connection.query('DELETE FROM preventOverlapLogin WHERE nickname = ?',[nickname],(error,results,field)=>{
+            if(error){
+                reject('error');
+            }else{
+                resolve(results);
+            }
+        });
+    });
+}
+
+const InitPreventOverlapLogin = ()=>{
+    return new Promise((resolve,reject)=>{
+        connection.query('truncate preventOverlapLogin',(error,results,field)=>{
+            if(error){
+                reject('error');
+            }else{
+                resolve(results);
+            }
+        });
+    });
+}
+
+
+module.exports=
+{
+    CheckId,
+    CheckNickName,
+    RegistAccount,
+    CheckLogin,
+    GetStatic,
+    SetStatic,
+    RenewStatic,
+    LoginCheck,
+    LoginRegist,
+    LogOutRegist,
+    InitPreventOverlapLogin
+}
