@@ -8,6 +8,8 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
         this.socket = this.props.socket;
         this.isMyTurn = 0;//0은 시작안함, 1은 자기턴, 2는 대기중
 
+        this.msgInput = React.createRef();
+        
         this.ReadySocket();
         this.socket.emit('RequestGameSetting','');
 
@@ -57,7 +59,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             if(!this._ismounted){
                 return;
             }
-            console.log(recv);
+
             if(recv.result === 'Victory'){
                 alert('승리하였습니다');
                 this.socket.emit('CheckResult','');
@@ -74,6 +76,10 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
             let board = this.state.board;
             board[recv.xPos + 20 * recv.yPos] = recv.team;
             this.setState({board:board});
+        });
+
+        this.socket.on('roomMessage',(recv)=>{
+            this.setState({message: this.state.message.concat({nickname:recv.nickname, message:recv.message})});
         })
     }
 
@@ -87,7 +93,11 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
 
         this.socket.emit('StonePlace',{xPos:x, yPos:y});    //서버에 돌 놓기/ 상대에게 돌전달/ 승리 체크 요청함.
     }
-
+    
+    sendMessage = ()=>{//아이디 추가
+        this.socket.emit('GameRoomChatting',{message:this.msgInput.current.value});
+        this.msgInput.current.value ='';
+    }
 
     render(){
         let boardRenderList = [];
@@ -136,7 +146,7 @@ class GameRoom extends React.Component{ //각 개인이 접속되어 보이는 �
 		                {messageRenderList}
 		            </ul>
 		            <input type='text' placeholder='chatting' ref={this.msgInput}></input>{/*<!-- 채팅 입력 칸 --><!-- 
-		         -->*/}<button id="sendMessage">전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
+		         -->*/}<button id="sendMessage" onClick ={()=>{this.sendMessage()}}>전송</button>{/*<!-- 채팅 전송 버튼 -->*/}
 		        </div>
 		        <div id='snack' className={(!this.state.turn ? 'snackOp' : '')}>{/*<!-- 순서가 찾아올 때 나타나는 문구 -->*/}
 		        	<span>당신의 차례입니다.</span>

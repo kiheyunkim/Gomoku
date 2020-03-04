@@ -137,7 +137,6 @@ IO.on('connection',(socket)=>{
             return;
         }
 
-
         if(isSuccess){
             let registLogin =  mysql.LoginRegist(socket.nickname);   //로그인 등록
             await registLogin.then((value)=>{
@@ -171,7 +170,6 @@ IO.on('connection',(socket)=>{
         let idCheck = mysql.CheckId(id);
         let idCheckRes = false;
         await idCheck.then((value)=>{
-            
             if(value[0]['count(*)'] === 1){                     //이미 있음 오류
                 idCheckRes = false;
             }else{
@@ -223,7 +221,6 @@ IO.on('connection',(socket)=>{
                 registRes = false;
             });
         }
-
 
         if(!registRes){
             IO.to(socket.id).emit('Result',{ResultType:'RegisterFail'});
@@ -319,7 +316,7 @@ IO.on('connection',(socket)=>{
     });
 
     //채팅
-    socket.on('roomchating',(recv)=>{//방안에서 채팅 처리
+    socket.on('GameRoomChatting',(recv)=>{//방안에서 채팅 처리
         let newMessage = recv.message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
         IO.to(socket.roomid).emit('roomMessage',{nickname:socket.nickname, message:newMessage});
     });
@@ -385,6 +382,10 @@ IO.on('connection',(socket)=>{
         IO.to(socket.id).emit('GameInitialization',{color:selfMember.teamColor, isYourTurn: (targetRoom.member[targetRoom.turn].nickname === socket.nickname ? true : false)});
     });
 
+    socket.on('GameRoomChatting',(recv)=>{
+
+    });
+
     //돌 놓는거 확인
     socket.on('StonePlace',async (recv)=>{
         let targetRoom = GameRoomList.find(element=>element.roomid === socket.roomid);
@@ -435,8 +436,7 @@ IO.on('connection',(socket)=>{
                     sockets[key].loseCount++;
                 }
             }
-
-
+            
             socket.emit('PlayResult',{result:'Victory'});//승리 통보
             socket.to(socket.roomid).broadcast.emit('PlayResult',{result:'Defeat'});//패배통보
         }else{//다음 턴을 통보

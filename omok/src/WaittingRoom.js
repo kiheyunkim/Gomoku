@@ -81,7 +81,7 @@ class WaittingRoom extends React.Component{
         this.setState({modalState:false});
     }
 
-    sendMessage = (message)=>{//아이디 추가
+    sendMessage = (message)=>{
         this.socket.emit('WaitingChatting',{message:message});
         this.msgInput.current.value ='';
     }

@@ -57,6 +57,7 @@ class Login extends React.Component{
 
     ReadySocket = () =>{
         this.socket.on('Result',(recv)=>{
+            console.log(recv);
             if(recv.ResultType === 'LoginFail'){
                 alert('아이디 또는 비밀번호를 확인하세요.');
             }else if(recv.ResultType === 'IdAlreadyExist'){
