@@ -452,6 +452,8 @@ IO.on('connection',(socket)=>{
 });
 
 let checkVictory=(board,posX,posY)=>{       //로직 검사
+
+    //세로 확인
     //북쪽 조사
     let stdColor = board[posX + posY * 20];  //이 색을 기준으로 조사해야함
     let x = posX, y = posY - 1;
@@ -462,10 +464,22 @@ let checkVictory=(board,posX,posY)=>{       //로직 검사
         count++;
         y--;
     }
+
+    //남쪽 조사
+    x = posX;
+    y = posY + 1;
+    while(y < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        y++;
+    }
+
     if(count === 5){
         return true;
     }
 
+    //   / 방향 확인
     //북동쪽 조사
     x = posX + 1;
     y = posY - 1;
@@ -477,57 +491,10 @@ let checkVictory=(board,posX,posY)=>{       //로직 검사
         x++;
         y--;
     }
-    if(count === 5){
-        return true;
-    }
-
-    //동쪽 조사
-    x = posX + 1;
-    y = posY;
-    count = 1;
-    while(x < 20){
-        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
-            break;
-        count++
-        x++;
-    }
-    if(count === 5){
-        return true;
-    }
-
-    //동남쪽 조사
-    x = posX + 1;
-    y = posY + 1;
-    count = 1;
-    while(x < 20 && y < 20){
-        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
-            break;
-        count++
-        x++;
-        y++;
-    }
-    if(count === 5){
-        return true;
-    }
-
-    //남쪽 조사
-    x = posX;
-    y = posY + 1;
-    count = 1;
-    while(y < 20){
-        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
-            break;
-        count++
-        y++;
-    }
-    if(count === 5){
-        return true;
-    }
-
+    
     //남서쪽 조사
     x = posX - 1;
     y = posY + 1;
-    count = 1;
     while(x >= 0 && y < 20){
         if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
             break;
@@ -539,10 +506,50 @@ let checkVictory=(board,posX,posY)=>{       //로직 검사
         return true;
     }
 
+    //  \ 방향 조사
+    //동남쪽 조사
+    x = posX + 1;
+    y = posY + 1;
+    count = 1;
+    while(x < 20 && y < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x++;
+        y++;
+    }
+
+    //북서쪽 조사
+    x = posX - 1;
+    y = posY - 1;
+    while(x >= 0 && y >= 0){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x--;
+        y--;
+    }
+
+    if(count === 5){
+        return true;
+    }
+
+
+    //가로 조사
+    //동쪽 조사
+    x = posX + 1;
+    y = posY;
+    count = 1;
+    while(x < 20){
+        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
+            break;
+        count++
+        x++;
+    }
+
     //서쪽 조사
     x = posX - 1;
     y = posY;
-    count = 1;
     while(x >= 0){
         if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
             break;
@@ -553,20 +560,7 @@ let checkVictory=(board,posX,posY)=>{       //로직 검사
         return true;
     }
 
-    //북서쪽 조사
-    x = posX - 1;
-    y = posY - 1;
-    count = 1;
-    while(x >= 0 && y >= 0){
-        if(board[x + y*20] !== stdColor || board[x+y*20] === 0)//색이 다르거나 빈칸이면 더이상 전진 X
-            break;
-        count++
-        x--;
-        y--;
-    }
-    if(count === 5){
-        return true;
-    }
+    
 
     return false;
 }
