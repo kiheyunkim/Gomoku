@@ -74,6 +74,10 @@ IO.on('connection',(socket)=>{
             for(let i=0;i<members.length;++i){
                 members[i].readyState = false;
             }
+
+            if(room.member.length === 0){//한명뿐인 방은 그가 나가면 방이 없어져야함.
+                GameRoomList = GameRoomList.filter(element => element.roomid !== socket.roomid);
+            }
         }
         
         if(socket.nickname!==undefined){ //닉네임이 있다는 것은 로그인 했다는 것
