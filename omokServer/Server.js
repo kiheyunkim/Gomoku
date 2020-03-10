@@ -95,6 +95,13 @@ IO.on('connection',(socket)=>{
         //로그인 요청
         let id = recv.loginId;
         let pw = recv.loginPasswd;
+
+        //길이 초과하면 오버플로남
+        if(id.length >= 15 || pw.length >= 15){
+            IO.to(socket.id).emit('Result',{ResultType :'LoginFail'});    //실패 통보
+            return;
+        }
+
         //DB에 확인
         let isSuccess = false;
         //###### DB 처리 #############
@@ -168,6 +175,21 @@ IO.on('connection',(socket)=>{
         //PW 불일치
         if(passwd1 !== passwd2){
             IO.to(socket.id).emit('Result',{ResultType:'PwNotSame'});
+            return;
+        }
+
+        //길이 초과하면 오버플로남
+        if(id.length >= 10){
+            IO.to(socket.id).emit('Result',{ResultType :'IdLengthEexceeded'});    //실패 통보
+            return;
+        }
+        if(nickname.length >= 10){
+            IO.to(socket.id).emit('Result',{ResultType :'NickLengthEexceeded'});    //실패 통보
+            return;
+        }
+
+        if(nickname.match(/<|>/g) !== null){ 
+            IO.to(socket.id).emit('Result',{ResultType :'NickNameInvalid'});    //실패 통보
             return;
         }
         

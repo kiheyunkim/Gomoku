@@ -62,6 +62,12 @@ class Login extends React.Component{
                 alert('아이디 또는 비밀번호를 확인하세요.');
             }else if(recv.ResultType === 'IdAlreadyExist'){
                 alert('이미 존재하는 ID입니다.');
+            }else if(recv.ResultType === 'IdLengthEexceeded'){ 
+                alert('ID의 길이는 10자 까지만 허용됩니다.');
+            }else if(recv.ResultType === 'NickLengthEexceeded'){
+                alert('닉네임의 길이는 10자 까지만 허용됩니다.');
+            }else if(recv.ResultType === 'NickNameInvalid'){
+                alert('닉네임에 허용되지 않는 문자가 있습니다.');
             }else if(recv.ResultType === 'PwNotSame'){
                 alert('비밀번호가 일치하지 않습니다.');
             }else if(recv.ResultType === 'NickNameAlreadyExist'){
