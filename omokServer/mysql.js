@@ -10,6 +10,15 @@ const connection = mysql.createConnection({
     database:mysqlInfo.database
 });
 
+//1시간 마다 의무적으로 쿼리를 보냄 = 끊김 방지
+let keepAliveInterval = setInterval(()=>{
+    connection.query('select 1',(error,results,fields)=>{
+        if(error)
+            throw error;
+    })
+},3600000);
+
+
 const CheckId = (id)=>{
     return new Promise((resolve,reject)=>{
         connection.query('SELECT count(*) FROM user WHERE id = ?',[id],(error,results,field)=>{
