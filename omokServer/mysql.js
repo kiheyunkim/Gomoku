@@ -141,8 +141,9 @@ const LogOutRegist = (nickname)=>{
 
 const InitPreventOverlapLogin = ()=>{
     return new Promise((resolve,reject)=>{
-        connection.query('truncate preventOverlapLogin',(error,results,field)=>{
+        connection.query('truncate `preventOverlapLogin`',(error,results,field)=>{
             if(error){
+		console.log(error);
                 reject('error');
             }else{
                 resolve(results);
@@ -150,6 +151,7 @@ const InitPreventOverlapLogin = ()=>{
         });
     });
 }
+
 
 
 module.exports=

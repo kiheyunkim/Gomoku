@@ -1,0 +1,85 @@
+
+> omok@0.1.0 start /home/ubuntu/2ndProj-Omok/omok
+> react-scripts start
+
+
+> omok@0.1.0 start /home/ubuntu/2ndProj-Omok/omok
+> react-scripts start
+
+Starting the development server...
+
+Something is already running on port 3000.
+
+┌──────────────────────────────────────────────────────────┐
+│                 npm update check failed                  │
+│           Try running with sudo or get access            │
+│           to the local update config store via           │
+│ sudo chown -R $USER:$(id -gn $USER) /home/ubuntu/.config │
+└──────────────────────────────────────────────────────────┘
+Compiled successfully!
+
+You can now view omok in the browser.
+
+  Local:            http://localhost:3000/
+  On Your Network:  http://172.31.36.182:3000/
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+
+> omok@0.1.0 start /home/ubuntu/2ndProj-Omok/omok
+> react-scripts start
+
+Starting the development server...
+
+Compiled successfully!
+
+You can now view omok in the browser.
+
+  Local:            http://localhost:3000/
+  On Your Network:  http://172.31.36.182:3000/
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+Terminated
+npm ERR! code ELIFECYCLE
+npm ERR! errno 143
+npm ERR! omok@0.1.0 start: `react-scripts start`
+npm ERR! Exit status 143
+npm ERR! 
+npm ERR! Failed at the omok@0.1.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/ubuntu/.npm/_logs/2020-03-13T02_29_57_176Z-debug.log
+
+> omok@0.1.0 start /home/ubuntu/2ndProj-Omok/omok
+> react-scripts start
+
+Starting the development server...
+
+Compiled successfully!
+
+You can now view omok in the browser.
+
+  Local:            http://localhost:3000/
+  On Your Network:  http://172.31.36.182:3000/
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+Compiling...
+Compiled successfully!
+
+> omok@0.1.0 start /home/ubuntu/2ndProj-Omok/omok
+> react-scripts start
+
+Something is already running on port 3000.
+
+┌──────────────────────────────────────────────────────────┐
+│                 npm update check failed                  │
+│           Try running with sudo or get access            │
+│           to the local update config store via           │
+│ sudo chown -R $USER:$(id -gn $USER) /home/ubuntu/.config │
+└──────────────────────────────────────────────────────────┘

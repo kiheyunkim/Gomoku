@@ -1,11 +1,8 @@
-DROP DATABASE omok;
 CREATE DATABASE omok;
 
 USE omok;
 
-DROP TABLE statistic;
-DROP TABLE user;
-DROP TABLE preventOverlapLogin;
+
 
 CREATE TABLE user(
     id varchar(30) NOT NULL,
