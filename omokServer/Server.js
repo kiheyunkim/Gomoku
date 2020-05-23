@@ -6,9 +6,10 @@ const mysql = require('./mysql');
 
 const corsInfo = JSON.parse(fs.readFileSync(__dirname +'/AuthInfo/CorsInfo.json',{encoding:'UTF-8'}));
 ///https://www.zerocho.com/category/NodeJS/post/57edfcf481d46f0015d3f0cd
-app.use(require('cors')({origin:corsInfo.origin,credentials:corsInfo.credentials}));
 
-const server = app.listen(4000, ()=>console.log('Omok Server Open  ---> 4000'));
+app.use(express.static(__dirname + "/public"));
+const server = app.listen(3000, ()=>console.log('Omok Server Open  ---> 3000'));
+
 const IO = require('socket.io').listen(server);
 const waitingRoomId = Sha256((Math.random() * 10000).toString());
 
