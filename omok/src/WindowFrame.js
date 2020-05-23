@@ -9,7 +9,7 @@ const socketIo = require('socket.io-client');
 class WindowFrame extends React.Component{
     constructor(props){
         super(props);
-        this.socket = socketIo('http://localhost:3000');
+        this.socket = socketIo('http://54.180.104.43:3000');
         this.readySocket();
         
         this.state={ScreenState:''};
