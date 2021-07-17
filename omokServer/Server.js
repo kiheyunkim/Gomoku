@@ -7,7 +7,7 @@ const mysql = require('./mysql');
 app.use(express.static(__dirname + "/public"));
 const server = app.listen(3000, ()=>console.log('Omok Server Open  ---> 3000'));
 
-const IO = require('socket.io').listen(server);
+const IO = require('socket.io')(server);
 const waitingRoomId = Sha256((Math.random() * 10000).toString());
 
 let GameRoomList = []
