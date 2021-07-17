@@ -4,9 +4,6 @@ const app = express();
 const Sha256 = require('sha256');
 const mysql = require('./mysql');
 
-const corsInfo = JSON.parse(fs.readFileSync(__dirname +'/AuthInfo/CorsInfo.json',{encoding:'UTF-8'}));
-///https://www.zerocho.com/category/NodeJS/post/57edfcf481d46f0015d3f0cd
-
 app.use(express.static(__dirname + "/public"));
 const server = app.listen(3000, ()=>console.log('Omok Server Open  ---> 3000'));
 
@@ -16,7 +13,7 @@ const waitingRoomId = Sha256((Math.random() * 10000).toString());
 let GameRoomList = []
 let roomNumberCount = 1;
 
-mysql.InitPreventOverlapLogin();
+mysql.initPreventOverlapLogin();
 
 //대기실은 SHA 256으로 랜덤 생성
 IO.on('connection',(socket)=>{
@@ -48,12 +45,12 @@ IO.on('connection',(socket)=>{
             
             let loser = room.member.find(element=>element.nickname === socket.nickname) //나간 존재는 패배 기록
             loser.loseCount++;
-            let loseWrite = mysql.RenewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
+            let loseWrite = mysql.renewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
             await loseWrite;
 
             let winner = room.member.find(element=>element.nickname !== socket.nickname) //안나간 존재는 승리 기록
             winner.winCount++;
-            let winnerWrite = mysql.RenewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
+            let winnerWrite = mysql.renewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
             await winnerWrite;
 
             room.member = room.member.filter(element=>element.nickname !== socket.nickname);    //나간 멤버 제외
@@ -82,7 +79,7 @@ IO.on('connection',(socket)=>{
         }
         
         if(socket.nickname!==undefined){ //닉네임이 있다는 것은 로그인 했다는 것
-            let disconnectLogout = mysql.LogOutRegist(socket.nickname);
+            let disconnectLogout = mysql.enRollLogOut(socket.nickname);
             await disconnectLogout;
         }
         socket.disconnect();
@@ -106,7 +103,7 @@ IO.on('connection',(socket)=>{
         //DB에 확인
         let isSuccess = false;
         //###### DB 처리 #############
-        let logincheck = mysql.CheckLogin(id, Sha256(pw));
+        let logincheck = mysql.checkLogin(id, Sha256(pw));
 
         await logincheck.then((value)=>{
             if(value.length === 0){                     //결과 없음
@@ -121,7 +118,7 @@ IO.on('connection',(socket)=>{
         //#############################
 
         if(isSuccess){
-            let getStatic = mysql.GetStatic(socket.nickname);
+            let getStatic = mysql.getStatic(socket.nickname);
             await getStatic.then((value)=>{
                 socket.winCount = value[0].win;
                 socket.loseCount = value[0].lose;
@@ -132,7 +129,7 @@ IO.on('connection',(socket)=>{
 
         let alreadyLogin = false;
         if(isSuccess){
-            let preventOverlapLogin = mysql.LoginCheck(socket.nickname);
+            let preventOverlapLogin = mysql.loginCheck(socket.nickname);
             await preventOverlapLogin.then(async (value)=>{
                 if(value[0]['count(*)'] === 1){    //이미 있는 경우
                     alreadyLogin=true;
@@ -150,7 +147,7 @@ IO.on('connection',(socket)=>{
         }
 
         if(isSuccess){
-            let registLogin =  mysql.LoginRegist(socket.nickname);   //로그인 등록
+            let registLogin =  mysql.enRollLogin(socket.nickname);   //로그인 등록
             await registLogin.then((value)=>{
             },(reason)=>{
                 isSuccess = false;
@@ -194,7 +191,7 @@ IO.on('connection',(socket)=>{
             return;
         }
         
-        let idCheck = mysql.CheckId(id);
+        let idCheck = mysql.checkId(id);
         let idCheckRes = false;
         await idCheck.then((value)=>{
             if(value[0]['count(*)'] === 1){                     //이미 있음 오류
@@ -212,7 +209,7 @@ IO.on('connection',(socket)=>{
         }
         
         let nicknameCheckRes = false;
-        let nicknameCheck = mysql.CheckNickName(nickname);
+        let nicknameCheck = mysql.checkNickName(nickname);
         await nicknameCheck.then((value)=>{
             if(value[0]['count(*)'] === 1){                     //이미 있음 오류
                 nicknameCheckRes = false;
@@ -231,7 +228,7 @@ IO.on('connection',(socket)=>{
         
         //모두 문제없는경우
         //DB에 등록
-        let registAccount = mysql.RegistAccount(id, Sha256(passwd1), nickname);
+        let registAccount = mysql.signUpAccount(id, Sha256(passwd1), nickname);
         let registRes = false;
         await registAccount.then((value)=>{
             registRes = true;
@@ -241,7 +238,7 @@ IO.on('connection',(socket)=>{
 
         //승률 기록용 DB에도 등록
         if(registRes){
-            let SetStatic = mysql.SetStatic(nickname);
+            let SetStatic = mysql.setStatic(nickname);
             await SetStatic.then((value)=>{
                 registRes = true;
             },(reason)=>{
@@ -446,12 +443,12 @@ IO.on('connection',(socket)=>{
 
             let loser = targetRoom.member.find(element=>element.nickname !== socket.nickname) //다른 존재는 패배 기록
             loser.loseCount++;
-            let loseWrite = mysql.RenewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
+            let loseWrite = mysql.renewStatic(loser.nickname, loser.winCount, loser.loseCount);//패배 기록
             await loseWrite;
 
             let winner = targetRoom.member.find(element=>element.nickname === socket.nickname) //현재 놓은자는 승리 기록
             winner.winCount++;
-            let winnerWrite = mysql.RenewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
+            let winnerWrite = mysql.renewStatic(winner.nickname, winner.winCount, winner.loseCount);//승리 기록
             await winnerWrite;
 
             //남은 대상들(나간 대상은 이미 방을 떠났다)의 상태를 대기실로 옮겨줌
