@@ -462,7 +462,8 @@ IO.on('connection',(socket)=>{
             }
             
             socket.emit('PlayResult',{result:'Victory'});//승리 통보
-            socket.to(socket.roomid).broadcast.emit('PlayResult',{result:'Defeat'});//패배통보
+            console.log(socket.to(socket.roomid))
+            socket.to(socket.roomid).emit('PlayResult',{result:'Defeat'});//패배통보
         }else{//다음 턴을 통보
             socket.emit('PlaceResult',{Result:'PlaceOK'});
             socket.broadcast.to(socket.roomid).emit('PlaceResult',{Result:'YourTurn'});
