@@ -32,7 +32,7 @@ BE: ![](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=
 
 design: [최송은](https://github.com/ostrichtofu)
 
-programming: [김기현](https://github.com/kihyeunkim)
+programming: [김기현](https://github.com/kiheyunkim)
 
 
 
