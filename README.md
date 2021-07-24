@@ -20,9 +20,9 @@ npm start
 
 ## Skills
 
-FE: ![](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+FE: ![](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB), ![](https://socket.io/css/images/logo.svg)
 
-BE: ![](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white), ![](https://socket.io/css/images/logo.svg)
+BE: ![](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white), ![](https://socket.io/css/images/logo.svg), ![](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
 
 
 
@@ -124,5 +124,5 @@ CREATE TABLE IF NOT EXISTS preventOverlapLogin(
 
 ---
 
-## Lisence
+## License
 
